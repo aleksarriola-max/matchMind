@@ -3,6 +3,13 @@ import importlib
 import pytest
 
 
+@pytest.fixture(autouse=True)
+def _restore_adapter_demo_mode():
+    yield
+    from backend.llm import adapter
+    importlib.reload(adapter)
+
+
 def _reload_adapter(monkeypatch, provider=None):
     if provider is None:
         monkeypatch.delenv("MATCHMIND_LLM_PROVIDER", raising=False)
