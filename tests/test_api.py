@@ -35,3 +35,45 @@ def test_moment_found():
 def test_moment_not_found():
     response = client.get("/api/moment/nonexistent")
     assert response.status_code == 404
+
+
+def test_ask_routed_question_returns_full_schema():
+    response = client.post(
+        "/api/ask",
+        json={"question": "Why was the goal disallowed for offside in the 27th minute?", "persona": "analyst", "language": "English"},
+    )
+    assert response.status_code == 200
+    data = response.json()
+    for key in ["answer", "persona", "language", "moment_id", "verification", "explainability", "llm"]:
+        assert key in data
+    assert data["moment_id"] == "offside_27"
+    assert data["persona"] == "analyst"
+    assert data["language"] == "English"
+    assert data["llm"] == {"provider": "demo", "model": None}
+    for key in ["verified", "coverage", "checked_sentences", "unsupported", "method"]:
+        assert key in data["verification"]
+
+
+def test_ask_general_question_has_null_moment_id():
+    response = client.post(
+        "/api/ask",
+        json={"question": "What's the weather forecast for the stadium tonight?", "persona": "beginner", "language": "English"},
+    )
+    assert response.status_code == 200
+    assert response.json()["moment_id"] is None
+
+
+def test_ask_defaults_persona_and_language():
+    response = client.post("/api/ask", json={"question": "Why was the goal disallowed for offside in the 27th minute?"})
+    assert response.status_code == 200
+    data = response.json()
+    assert data["persona"] == "analyst"
+    assert data["language"] == "English"
+
+
+def test_ask_invalid_persona_returns_422():
+    response = client.post(
+        "/api/ask",
+        json={"question": "Why was the goal disallowed?", "persona": "referee", "language": "English"},
+    )
+    assert response.status_code == 422

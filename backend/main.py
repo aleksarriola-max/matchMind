@@ -2,8 +2,10 @@ from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
+from pydantic import BaseModel, field_validator
 
 from backend.engines import explainer
+from backend.engines.verifier import verify
 from backend.llm import adapter
 from backend.rag.retriever import get_retriever
 
@@ -47,3 +49,41 @@ def moment(moment_id: str):
     if moment_id not in moments:
         raise HTTPException(status_code=404, detail=f"Unknown moment id: {moment_id!r}")
     return moments[moment_id]
+
+
+VALID_PERSONAS = {"beginner", "analyst", "kid", "journalist", "coach"}
+
+
+class AskRequest(BaseModel):
+    question: str
+    persona: str = "analyst"
+    language: str = "English"
+
+    @field_validator("persona")
+    @classmethod
+    def validate_persona(cls, value: str) -> str:
+        if value not in VALID_PERSONAS:
+            raise ValueError(f"persona must be one of {sorted(VALID_PERSONAS)}")
+        return value
+
+
+@app.post("/api/ask")
+def ask(request: AskRequest):
+    moment_id = explainer.route(request.question)
+    grounded = explainer.ground(request.question, moment_id)
+    answer = explainer.compose_demo(request.persona, grounded["moment"], grounded["retrieved"])
+    if grounded["moment"] is not None:
+        evidence_texts = grounded["moment"]["evidence"]
+    else:
+        evidence_texts = [r["text"] for r in grounded["retrieved"]]
+    verification = verify(answer, evidence_texts)
+    explainability = explainer.explain(moment_id, grounded["moment"], grounded["retrieved"], verification)
+    return {
+        "answer": answer,
+        "persona": request.persona,
+        "language": "English",
+        "moment_id": moment_id,
+        "verification": verification,
+        "explainability": explainability,
+        "llm": adapter.health_info(),
+    }
