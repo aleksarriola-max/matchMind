@@ -66,3 +66,18 @@ def test_decision_classes_match_confidence_levels():
     # measured (offside) should be the most confident, general/tactical the least
     assert data["moments"]["offside_27"]["confidence"] > data["moments"]["handball_38"]["confidence"]
     assert data["moments"]["handball_38"]["confidence"] > data["moments"]["sub_58"]["confidence"]
+
+
+KNOWLEDGE_PATH = Path(__file__).resolve().parent.parent / "backend" / "data" / "knowledge" / "laws_and_tactics.md"
+
+
+def test_knowledge_pack_has_nine_sections():
+    text = KNOWLEDGE_PATH.read_text(encoding="utf-8")
+    sections = [line for line in text.splitlines() if line.startswith("## ")]
+    assert len(sections) == 9
+
+
+def test_knowledge_pack_covers_key_numbers():
+    text = KNOWLEDGE_PATH.read_text(encoding="utf-8")
+    for number in ["11 cm", "99.7%", "250 ms", "53 ms", "4-3-3", "4-4-2", "63rd", "84th", "71st"]:
+        assert number in text, f"missing {number!r} in knowledge pack"
