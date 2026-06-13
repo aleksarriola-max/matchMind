@@ -1,4 +1,5 @@
 from backend.engines import explainer
+from backend.engines.verifier import verify
 
 
 def test_route_offside():
@@ -68,3 +69,40 @@ def test_compose_demo_general_question_uses_top_retrieved_chunk():
     answer = explainer.compose_demo("analyst", None, retrieved)
     first_sentence = retrieved[0]["text"].split(".")[0].replace("\n", " ")
     assert first_sentence in answer
+
+
+def test_explain_for_measured_moment():
+    moment_id = "offside_27"
+    grounded = explainer.ground("Why was the goal disallowed for offside in the 27th minute?", moment_id)
+    answer = explainer.compose_demo("analyst", grounded["moment"], grounded["retrieved"])
+    verification = verify(answer, grounded["moment"]["evidence"])
+    result = explainer.explain(moment_id, grounded["moment"], grounded["retrieved"], verification)
+    assert result["confidence"] == 0.997
+    assert result["confidence_components"]["decision_class"] == "measured"
+    assert result["counterfactual"] is not None
+    assert result["debate"] is not None
+    assert result["lineage"] == "question -> route[offside_27] -> retrieve[3 chunks] -> demo composer -> verifier[lexical]"
+
+
+def test_explain_for_general_question():
+    grounded = explainer.ground("What's the weather forecast for the stadium tonight?", None)
+    answer = explainer.compose_demo("analyst", grounded["moment"], grounded["retrieved"])
+    evidence = [r["text"] for r in grounded["retrieved"]]
+    verification = verify(answer, evidence)
+    result = explainer.explain(None, grounded["moment"], grounded["retrieved"], verification)
+    assert result["confidence"] == 0.5
+    assert result["confidence_components"]["decision_class"] == "general"
+    assert result["counterfactual"] is None
+    assert result["debate"] is None
+    assert result["lineage"] == "question -> route[none] -> retrieve[3 chunks] -> demo composer -> verifier[lexical]"
+
+
+def test_explain_schema_has_all_required_keys():
+    grounded = explainer.ground("Why did Borealia's pressing collapse due to fatigue late on?", "fatigue_71")
+    answer = explainer.compose_demo("coach", grounded["moment"], grounded["retrieved"])
+    verification = verify(answer, grounded["moment"]["evidence"])
+    result = explainer.explain("fatigue_71", grounded["moment"], grounded["retrieved"], verification)
+    for key in ["confidence", "confidence_basis", "confidence_components", "sources", "evidence", "counterfactual", "debate", "uncertainty", "lineage"]:
+        assert key in result
+    for key in ["evidence_coverage", "retrieval_strength_top", "decision_class", "note"]:
+        assert key in result["confidence_components"]

@@ -71,3 +71,50 @@ def compose_demo(persona: str, moment: dict | None, retrieved: list[dict]) -> st
         body = "No grounded information is available for this question."
     body = body.rstrip(".")
     return f"{intro} — {body} — {outro}"
+
+
+DECISION_CLASS = {
+    "offside_27": "measured",
+    "handball_38": "judgment",
+    "halftime_shift": "general",
+    "sub_58": "general",
+    "goal_home_1": "general",
+    "fatigue_71": "inferred",
+    "goal_home_2": "general",
+}
+
+GENERAL_PRIOR_CONFIDENCE = 0.5
+
+CONFIDENCE_NOTES = {
+    "measured": "Confidence reflects a statistical model with quantified measurement error.",
+    "judgment": "Confidence reflects a judgment call calibrated against reaction-time benchmarks.",
+    "inferred": "Confidence reflects an inference from indirect indicators, not a direct measurement.",
+    "general": "Confidence reflects a general prior for non-decision questions.",
+}
+
+
+def explain(moment_id: str | None, moment: dict | None, retrieved: list[dict], verification: dict) -> dict:
+    decision_class = DECISION_CLASS.get(moment_id, "general")
+    confidence = moment["confidence"] if moment is not None else GENERAL_PRIOR_CONFIDENCE
+    sources = [
+        {"title": r["title"], "source": r["source"], "score": r["score"]}
+        for r in retrieved
+    ]
+    evidence = moment["evidence"] if moment is not None else [r["text"] for r in retrieved]
+    uncertainty = f"Approximately {round((1 - confidence) * 100, 1)}% residual uncertainty in this explanation."
+    return {
+        "confidence": confidence,
+        "confidence_basis": moment["decision"] if moment is not None else "General response grounded in retrieved knowledge.",
+        "confidence_components": {
+            "evidence_coverage": verification["coverage"],
+            "retrieval_strength_top": retrieved[0]["score"] if retrieved else 0.0,
+            "decision_class": decision_class,
+            "note": CONFIDENCE_NOTES[decision_class],
+        },
+        "sources": sources,
+        "evidence": evidence,
+        "counterfactual": moment["counterfactual"] if moment is not None else None,
+        "debate": moment["debate"] if moment is not None else None,
+        "uncertainty": uncertainty,
+        "lineage": f"question -> route[{moment_id or 'none'}] -> retrieve[{len(retrieved)} chunks] -> demo composer -> verifier[lexical]",
+    }
