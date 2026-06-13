@@ -5,7 +5,78 @@
   <title>MatchMind</title>
 </head>
 <body>
-  <h1>MatchMind</h1>
-  <p>The Ask MatchMind test page is coming in Task 12.</p>
+  <h1>MatchMind — Ask</h1>
+  <form id="ask-form">
+    <label>
+      Question:
+      <input type="text" id="question" size="60" value="Why was the goal disallowed for offside in the 27th minute?">
+    </label>
+    <br>
+    <label>
+      Persona:
+      <select id="persona">
+        <option value="beginner">beginner</option>
+        <option value="analyst" selected>analyst</option>
+        <option value="kid">kid</option>
+        <option value="journalist">journalist</option>
+        <option value="coach">coach</option>
+      </select>
+    </label>
+    <label>
+      Language:
+      <select id="language" disabled>
+        <option value="English" selected>English</option>
+      </select>
+    </label>
+    <br>
+    <button type="submit">Ask</button>
+  </form>
+  <pre id="result"></pre>
+
+  <script>
+    document.getElementById("ask-form").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const question = document.getElementById("question").value;
+      const persona = document.getElementById("persona").value;
+      const language = document.getElementById("language").value;
+
+      const response = await fetch("/api/ask", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question, persona, language }),
+      });
+      const data = await response.json();
+
+      const lines = [];
+      lines.push("Answer: " + data.answer);
+      lines.push("");
+      lines.push("Moment: " + data.moment_id);
+      lines.push("Confidence: " + data.explainability.confidence);
+      lines.push("Confidence basis: " + data.explainability.confidence_basis);
+      lines.push("");
+      lines.push("Sources:");
+      for (const source of data.explainability.sources) {
+        lines.push("  - " + source.title + " (" + source.source + ", score " + source.score + ")");
+      }
+      lines.push("");
+      lines.push("Evidence:");
+      for (const item of data.explainability.evidence) {
+        lines.push("  - " + item);
+      }
+      if (data.explainability.counterfactual) {
+        lines.push("");
+        lines.push("Counterfactual: " + data.explainability.counterfactual);
+      }
+      if (data.explainability.debate) {
+        lines.push("");
+        lines.push("Debate (stands): " + data.explainability.debate.stands);
+        lines.push("Debate (overturn): " + data.explainability.debate.overturn);
+      }
+      lines.push("");
+      lines.push("Verification: " + JSON.stringify(data.verification));
+
+      document.getElementById("result").textContent = lines.join("\n");
+    });
+  </script>
 </body>
 </html>

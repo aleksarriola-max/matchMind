@@ -77,3 +77,14 @@ def test_ask_invalid_persona_returns_422():
         json={"question": "Why was the goal disallowed?", "persona": "referee", "language": "English"},
     )
     assert response.status_code == 422
+
+
+def test_root_contains_ask_form():
+    response = client.get("/")
+    html = response.text
+    assert 'id="ask-form"' in html
+    assert 'id="question"' in html
+    assert 'id="persona"' in html
+    assert 'id="language"' in html
+    for persona in ["beginner", "analyst", "kid", "journalist", "coach"]:
+        assert f'value="{persona}"' in html
