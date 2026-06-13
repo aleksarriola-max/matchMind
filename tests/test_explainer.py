@@ -35,3 +35,34 @@ def test_route_general_question_returns_none():
 
 def test_route_tie_breaks_to_lowest_minute():
     assert explainer.route("Tell me about the offside call and the corner routine") == "offside_27"
+
+
+def test_ground_returns_moment_and_retrieved_for_routed_question():
+    result = explainer.ground("Why was the goal disallowed for offside in the 27th minute?", "offside_27")
+    assert result["moment"] is not None
+    assert result["moment"]["title"]
+    assert len(result["retrieved"]) > 0
+
+
+def test_ground_returns_none_moment_for_general_question():
+    result = explainer.ground("What's the weather forecast for the stadium tonight?", None)
+    assert result["moment"] is None
+    assert len(result["retrieved"]) > 0
+
+
+def test_reason_returns_empty_string_in_demo_mode():
+    assert explainer.reason("Why was the goal disallowed for offside?") == ""
+
+
+def test_compose_demo_for_each_persona_includes_decision_and_evidence():
+    moment = explainer.MATCH_DATA["moments"]["offside_27"]
+    for persona in explainer.PERSONA_TEMPLATES:
+        answer = explainer.compose_demo(persona, moment, [])
+        assert moment["decision"].rstrip(".") in answer
+        assert moment["evidence"][0] in answer
+
+
+def test_compose_demo_general_question_uses_top_retrieved_chunk():
+    retrieved = explainer.get_retriever().search("offside law semi-automated technology", k=3)
+    answer = explainer.compose_demo("analyst", None, retrieved)
+    assert retrieved[0]["text"].replace("\n", " ").rstrip(".") in answer

@@ -40,3 +40,34 @@ def route(question: str) -> str | None:
             best_score = score
             best_id = moment_id
     return best_id
+
+
+PERSONA_TEMPLATES = {
+    "beginner": ("Here's a simple way to think about it", "In short, that's the key idea."),
+    "analyst": ("Based on the available evidence", "Confidence here is calibrated to the decision class noted above."),
+    "kid": ("Okay, here's the fun part", "Pretty cool, right?"),
+    "journalist": ("Here's what we know", "As always, some uncertainty remains."),
+    "coach": ("Here's the pattern to watch for", "That's the coaching point to take away."),
+}
+
+
+def ground(question: str, moment_id: str | None) -> dict:
+    retrieved = get_retriever().search(question, k=3)
+    moment = MATCH_DATA["moments"].get(moment_id) if moment_id else None
+    return {"retrieved": retrieved, "moment": moment}
+
+
+def reason(question: str) -> str:
+    return adapter.generate("", question)
+
+
+def compose_demo(persona: str, moment: dict | None, retrieved: list[dict]) -> str:
+    intro, outro = PERSONA_TEMPLATES[persona]
+    if moment is not None:
+        body = moment["decision"] + " — " + " ".join(moment["evidence"][:2])
+    elif retrieved:
+        body = retrieved[0]["text"].replace("\n", " ")
+    else:
+        body = "No grounded information is available for this question."
+    body = body.rstrip(".")
+    return f"{intro} — {body} — {outro}"
