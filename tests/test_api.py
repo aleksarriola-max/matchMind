@@ -88,3 +88,39 @@ def test_root_contains_ask_form():
     assert 'id="language"' in html
     for persona in ["beginner", "analyst", "kid", "journalist", "coach"]:
         assert f'value="{persona}"' in html
+
+
+MOMENT_QUESTIONS = {
+    "offside_27": "Why was the goal disallowed for offside in the 27th minute?",
+    "handball_38": "Why didn't the referee award a penalty for the handball appeal?",
+    "halftime_shift": "Why did the team switch from a 4-3-3 to a 4-4-2 formation at halftime?",
+    "sub_58": "Why did they make a substitution and bring on a fresh winger in the 58th minute?",
+    "goal_home_1": "How did the equaliser happen to make it 1-1?",
+    "fatigue_71": "Why did Borealia's pressing collapse due to fatigue late on?",
+    "goal_home_2": "How was the winning goal scored from the corner?",
+}
+
+PERSONAS = ["beginner", "analyst", "kid", "journalist", "coach"]
+
+
+def test_ask_every_moment_and_persona_is_verified():
+    for moment_id, question in MOMENT_QUESTIONS.items():
+        for persona in PERSONAS:
+            response = client.post("/api/ask", json={"question": question, "persona": persona, "language": "English"})
+            assert response.status_code == 200, (moment_id, persona, response.text)
+            data = response.json()
+            assert data["moment_id"] == moment_id, (moment_id, persona, data["moment_id"])
+            assert data["verification"]["verified"] is True, (moment_id, persona, data["verification"])
+            assert data["verification"]["method"] == "lexical"
+
+
+def test_ask_general_question_is_verified():
+    response = client.post(
+        "/api/ask",
+        json={"question": "What's the weather forecast for the stadium tonight?", "persona": "analyst", "language": "English"},
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["moment_id"] is None
+    assert data["verification"]["verified"] is True
+    assert data["verification"]["method"] == "lexical"
