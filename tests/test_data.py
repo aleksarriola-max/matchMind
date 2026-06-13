@@ -81,3 +81,16 @@ def test_knowledge_pack_covers_key_numbers():
     text = KNOWLEDGE_PATH.read_text(encoding="utf-8")
     for number in ["11 cm", "99.7%", "250 ms", "53 ms", "4-3-3", "4-4-2", "63rd", "84th", "71st"]:
         assert number in text, f"missing {number!r} in knowledge pack"
+
+
+def test_offside_27_has_counterfactual_inputs():
+    data = load_match()
+    moment = data["moments"]["offside_27"]
+    assert moment["attacker_speed_ms"] == 7
+
+
+def test_handball_38_has_reaction_inputs():
+    data = load_match()
+    moment = data["moments"]["handball_38"]
+    assert moment["deflection_distance_m"] == 1.06
+    assert moment["ball_speed_ms"] == 20

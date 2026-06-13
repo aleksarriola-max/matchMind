@@ -53,6 +53,7 @@
       "confidence": 0.997,
       "margin_cm": 11,
       "camera_frame_uncertainty_cm": 6,
+      "attacker_speed_ms": 7,
       "summary": "In the 27th minute, Atlántica's striker received a through ball and finished from close range, but the assistant referee's onside call was overturned after a VAR review measured the striker 11 cm beyond the second-last Borealia defender at the moment the ball was played.",
       "pitch": {
         "offside_line_x": 72.0,
@@ -87,6 +88,8 @@
       "law": "Law 12 — Fouls and Misconduct (Handball)",
       "decision": "No penalty — accidental handball, no time to react",
       "confidence": 0.74,
+      "deflection_distance_m": 1.06,
+      "ball_speed_ms": 20,
       "summary": "In the 38th minute, a deflected shot struck a Borealia defender's arm inside the penalty area. The referee ruled no penalty, judging the contact accidental because the defender had no realistic time to avoid it.",
       "evidence": [
         "Law 12 does not penalize the ball touching a player's hand or arm if the contact is accidental and the player had no realistic chance to avoid it.",
