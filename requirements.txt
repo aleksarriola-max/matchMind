@@ -1,6 +1,8 @@
 fastapi>=0.110
 uvicorn>=0.29
 pydantic>=2.6
+pytest>=8.0
+httpx>=0.27
 # Optional — production ingestion and watsonx SDK:
 # docling
 # ibm-watsonx-ai
