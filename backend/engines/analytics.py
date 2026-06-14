@@ -16,7 +16,23 @@ def _phi(z: float) -> float:
     return 0.5 * (1 + math.erf(z / math.sqrt(2)))
 
 
+def _offside_verdict(probability: float) -> str:
+    if probability >= 0.95:
+        return "near-certain offside"
+    if probability >= 0.6:
+        return "likely offside"
+    if probability >= 0.4:
+        return "inconclusive"
+    if probability > 0.05:
+        return "likely not offside"
+    return "near-certain not offside"
+
+
 def offside_probability(margin_cm: float, camera_frame_uncertainty_cm: float, sigma_line_cm: float = 2.5) -> dict:
+    if sigma_line_cm <= 0:
+        raise ValueError(f"sigma_line_cm must be positive, got {sigma_line_cm}")
+    if camera_frame_uncertainty_cm < 0:
+        raise ValueError(f"camera_frame_uncertainty_cm must be non-negative, got {camera_frame_uncertainty_cm}")
     sigma_frame = camera_frame_uncertainty_cm / 1.96
     sigma_total = math.sqrt(sigma_frame ** 2 + sigma_line_cm ** 2)
     z = margin_cm / sigma_total
@@ -28,7 +44,11 @@ def offside_probability(margin_cm: float, camera_frame_uncertainty_cm: float, si
             "camera_frame_uncertainty_cm": camera_frame_uncertainty_cm,
             "sigma_line_cm": sigma_line_cm,
         },
-        "result": {"z": round(z, 2), "probability": round(probability, 3)},
+        "result": {
+            "z": round(z, 2),
+            "probability": round(probability, 3),
+            "verdict": _offside_verdict(probability),
+        },
     }
 
 

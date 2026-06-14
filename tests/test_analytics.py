@@ -15,6 +15,21 @@ def test_offside_probability_for_offside_27():
     }
 
 
+def test_offside_probability_verdict_for_offside_27():
+    result = analytics.offside_probability(11, 6)
+    assert result["result"]["verdict"] == "near-certain offside"
+
+
+def test_offside_probability_rejects_non_positive_sigma_line():
+    with pytest.raises(ValueError):
+        analytics.offside_probability(11, 6, sigma_line_cm=0)
+
+
+def test_offside_probability_rejects_negative_frame_uncertainty():
+    with pytest.raises(ValueError):
+        analytics.offside_probability(11, -1)
+
+
 def test_offside_sensitivity_for_offside_27():
     result = analytics.offside_sensitivity(11, 6)
     points = result["result"]
