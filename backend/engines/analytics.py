@@ -132,6 +132,15 @@ def fatigue_index(team_telemetry: dict) -> dict:
     baseline_long_pass = (long_pass[0] + long_pass[1]) / 2
     baseline_ppda = (ppda[0] + ppda[1]) / 2
 
+    for name, baseline in [
+        ("sprints", baseline_sprints),
+        ("line_gap_def_mid_m", baseline_line_gap),
+        ("long_pass_share", baseline_long_pass),
+        ("ppda", baseline_ppda),
+    ]:
+        if baseline == 0:
+            raise ValueError(f"baseline for {name} must be nonzero, got 0")
+
     sprint_decline = []
     line_stretch = []
     long_pass_drift = []
@@ -147,6 +156,16 @@ def fatigue_index(team_telemetry: dict) -> dict:
         long_pass_drift.append(round(lpd, 4))
         pressing_decay.append(round(pd, 4))
         index.append(round(100 * (sd + ls + lpd + pd) / 4, 1))
+
+    windows = TELEMETRY_DATA["windows"]
+    peak_window = windows[index.index(max(index))]
+    diff = index[-1] - index[2]
+    if diff > 5:
+        trend = "increasing"
+    elif diff < -5:
+        trend = "decreasing"
+    else:
+        trend = "stable"
 
     return {
         "formula": (
@@ -165,6 +184,8 @@ def fatigue_index(team_telemetry: dict) -> dict:
             "long_pass_drift": long_pass_drift,
             "pressing_decay": pressing_decay,
             "fatigue_index": index,
+            "peak_window": peak_window,
+            "trend": trend,
         },
     }
 

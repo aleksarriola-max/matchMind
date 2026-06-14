@@ -107,6 +107,31 @@ def test_counterfactual_timing_rejects_non_positive_speed():
         analytics.counterfactual_timing(11, 0)
 
 
+def test_fatigue_index_peak_and_trend_for_away_team():
+    telemetry = analytics.TELEMETRY_DATA["teams"]["away"]
+    result = analytics.fatigue_index(telemetry)
+    assert result["result"]["peak_window"] == "75-90"
+    assert result["result"]["trend"] == "increasing"
+
+
+def test_fatigue_index_peak_and_trend_for_home_team():
+    telemetry = analytics.TELEMETRY_DATA["teams"]["home"]
+    result = analytics.fatigue_index(telemetry)
+    assert result["result"]["peak_window"] == "15-30"
+    assert result["result"]["trend"] == "stable"
+
+
+def test_fatigue_index_rejects_zero_baseline():
+    telemetry = {
+        "sprints": [0, 0, 10, 10, 10, 10],
+        "line_gap_def_mid_m": [10, 10, 10, 10, 10, 10],
+        "long_pass_share": [0.3, 0.3, 0.3, 0.3, 0.3, 0.3],
+        "ppda": [10, 10, 10, 10, 10, 10],
+    }
+    with pytest.raises(ValueError):
+        analytics.fatigue_index(telemetry)
+
+
 def test_momentum_curve_shape_and_values():
     events = analytics.MATCH_DATA["events"]
     weights = analytics.TELEMETRY_DATA["event_weights_for_momentum"]
