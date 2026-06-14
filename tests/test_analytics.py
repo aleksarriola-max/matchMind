@@ -163,3 +163,15 @@ def test_fatigue_comparison_demo_telemetry():
     )
     assert result["result"]["more_fatigued_team"] == "away"
     assert result["inputs"] == {"home": home, "away": away}
+
+
+def test_momentum_summary_for_demo_curve():
+    events = analytics.MATCH_DATA["events"]
+    weights = analytics.TELEMETRY_DATA["event_weights_for_momentum"]
+    curve = analytics.momentum_curve(events, weights)
+    summary = analytics.momentum_summary(curve)
+    assert summary["peak_minute"] == 85
+    assert summary["peak_value"] == pytest.approx(48.2, abs=0.1)
+    assert summary["final_value"] == pytest.approx(41.0, abs=0.1)
+    assert summary["swing"] == pytest.approx(77.2, abs=0.1)
+    assert summary["dominant_team"] == "home"

@@ -224,3 +224,16 @@ def momentum_curve(events: list, event_weights: dict, decay: float = 0.85) -> li
                 value += weight * direction * decay ** ((t - event["minute"]) / 5)
         curve.append({"minute": t, "value": round(value, 1)})
     return curve
+
+
+def momentum_summary(curve: list) -> dict:
+    values = [p["value"] for p in curve]
+    peak = max(curve, key=lambda p: abs(p["value"]))
+    final_value = curve[-1]["value"]
+    return {
+        "peak_minute": peak["minute"],
+        "peak_value": peak["value"],
+        "final_value": final_value,
+        "swing": round(max(values) - min(values), 1),
+        "dominant_team": "home" if final_value > 0 else ("away" if final_value < 0 else "even"),
+    }
