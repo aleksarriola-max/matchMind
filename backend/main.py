@@ -4,7 +4,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, field_validator
 
-from backend.engines import explainer
+from backend.engines import analytics, explainer
 from backend.engines.verifier import verify
 from backend.llm import adapter
 from backend.rag.retriever import get_retriever
@@ -49,6 +49,44 @@ def moment(moment_id: str):
     if moment_id not in moments:
         raise HTTPException(status_code=404, detail=f"Unknown moment id: {moment_id!r}")
     return moments[moment_id]
+
+
+@app.get("/api/analytics")
+def analytics_endpoint():
+    offside = explainer.MATCH_DATA["moments"]["offside_27"]
+    handball = explainer.MATCH_DATA["moments"]["handball_38"]
+    telemetry = analytics.TELEMETRY_DATA
+    home_fatigue = analytics.fatigue_index(telemetry["teams"]["home"])
+    away_fatigue = analytics.fatigue_index(telemetry["teams"]["away"])
+    return {
+        "offside_probability": analytics.offside_probability(
+            offside["margin_cm"], offside["camera_frame_uncertainty_cm"]
+        ),
+        "offside_sensitivity": analytics.offside_sensitivity(
+            offside["margin_cm"], offside["camera_frame_uncertainty_cm"]
+        ),
+        "counterfactual_timing": analytics.counterfactual_timing(
+            offside["margin_cm"], offside["attacker_speed_ms"]
+        ),
+        "handball_reaction": analytics.handball_reaction(
+            handball["deflection_distance_m"], handball["ball_speed_ms"]
+        ),
+        "fatigue_index": {
+            "formula": home_fatigue["formula"],
+            "inputs": {"windows": telemetry["windows"]},
+            "result": {"home": home_fatigue["result"], "away": away_fatigue["result"]},
+        },
+        "momentum_curve": {
+            "formula": (
+                "momentum(t) = sum over events e where e.minute <= t of "
+                "weight(e.type) * direction(e) * decay^((t - e.minute) / 5)"
+            ),
+            "inputs": {"decay": 0.85, "event_weights": telemetry["event_weights_for_momentum"]},
+            "result": analytics.momentum_curve(
+                explainer.MATCH_DATA["events"], telemetry["event_weights_for_momentum"]
+            ),
+        },
+    }
 
 
 VALID_PERSONAS = {"beginner", "analyst", "kid", "journalist", "coach"}

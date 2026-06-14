@@ -1,3 +1,4 @@
+import pytest
 from fastapi.testclient import TestClient
 
 from backend.main import app
@@ -124,3 +125,26 @@ def test_ask_general_question_is_verified():
     assert data["moment_id"] is None
     assert data["verification"]["verified"] is True
     assert data["verification"]["method"] == "lexical"
+
+
+def test_analytics_endpoint_has_all_six_models():
+    response = client.get("/api/analytics")
+    assert response.status_code == 200
+    data = response.json()
+    for key in [
+        "offside_probability",
+        "offside_sensitivity",
+        "counterfactual_timing",
+        "handball_reaction",
+        "fatigue_index",
+        "momentum_curve",
+    ]:
+        assert key in data, key
+        for subkey in ["formula", "inputs", "result"]:
+            assert subkey in data[key], (key, subkey)
+    assert data["offside_probability"]["result"]["probability"] == pytest.approx(0.997, abs=0.001)
+    assert data["counterfactual_timing"]["result"]["delay_needed_ms"] == pytest.approx(15.7, abs=0.05)
+    assert data["handball_reaction"]["result"]["time_available_ms"] == 53.0
+    assert "home" in data["fatigue_index"]["result"]
+    assert "away" in data["fatigue_index"]["result"]
+    assert len(data["momentum_curve"]["result"]) == 19
