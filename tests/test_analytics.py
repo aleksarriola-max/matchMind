@@ -13,3 +13,15 @@ def test_offside_probability_for_offside_27():
         "camera_frame_uncertainty_cm": 6,
         "sigma_line_cm": 2.5,
     }
+
+
+def test_offside_sensitivity_for_offside_27():
+    result = analytics.offside_sensitivity(11, 6)
+    points = result["result"]
+    assert len(points) == 6
+    sigma_values = [p["sigma_line_cm"] for p in points]
+    assert sigma_values == [1.5, 2.0, 2.5, 3.0, 3.5, 4.0]
+    probabilities = [p["probability"] for p in points]
+    for p in probabilities:
+        assert 0.98 < p < 1.0
+    assert probabilities == sorted(probabilities, reverse=True)

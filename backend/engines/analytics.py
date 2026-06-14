@@ -30,3 +30,20 @@ def offside_probability(margin_cm: float, camera_frame_uncertainty_cm: float, si
         },
         "result": {"z": round(z, 2), "probability": round(probability, 3)},
     }
+
+
+def offside_sensitivity(margin_cm: float, camera_frame_uncertainty_cm: float) -> dict:
+    sigma_line_values = [1.5, 2.0, 2.5, 3.0, 3.5, 4.0]
+    result = []
+    for sigma_line_cm in sigma_line_values:
+        probability = offside_probability(margin_cm, camera_frame_uncertainty_cm, sigma_line_cm)["result"]["probability"]
+        result.append({"sigma_line_cm": sigma_line_cm, "probability": probability})
+    return {
+        "formula": "Sweep sigma_line_cm over [1.5, 4.0] step 0.5, recomputing P(offside) for each value",
+        "inputs": {
+            "margin_cm": margin_cm,
+            "camera_frame_uncertainty_cm": camera_frame_uncertainty_cm,
+            "sigma_line_cm_range": [1.5, 4.0],
+        },
+        "result": result,
+    }
