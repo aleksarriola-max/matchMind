@@ -148,6 +148,10 @@ def test_analytics_endpoint_has_all_six_models():
     assert "home" in data["fatigue_index"]["result"]
     assert "away" in data["fatigue_index"]["result"]
     assert len(data["momentum_curve"]["result"]) == 19
+    assert "fatigue_comparison" in data
+    assert data["fatigue_comparison"]["result"]["more_fatigued_team"] == "away"
+    assert "summary" in data["momentum_curve"]
+    assert data["momentum_curve"]["summary"]["dominant_team"] == "home"
 
 
 def test_match_momentum_is_computed_curve():
@@ -189,6 +193,8 @@ def test_moment_fatigue_71_has_analytics():
     fatigue = data["analytics"]["fatigue_index"]
     assert "home" in fatigue and "away" in fatigue
     assert fatigue["away"]["fatigue_index"][4] == pytest.approx(40.7, abs=0.1)
+    assert "fatigue_comparison" in data["analytics"]
+    assert data["analytics"]["fatigue_comparison"]["more_fatigued_team"] == "away"
 
 
 def test_moment_halftime_shift_has_null_analytics():

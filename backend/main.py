@@ -69,6 +69,9 @@ def _moment_analytics(moment_id: str, moment: dict) -> dict | None:
                 "home": analytics.fatigue_index(telemetry["teams"]["home"])["result"],
                 "away": analytics.fatigue_index(telemetry["teams"]["away"])["result"],
             },
+            "fatigue_comparison": analytics.fatigue_comparison(
+                telemetry["teams"]["home"], telemetry["teams"]["away"]
+            )["result"],
         }
     return None
 
@@ -90,6 +93,9 @@ def analytics_endpoint():
     telemetry = analytics.TELEMETRY_DATA
     home_fatigue = analytics.fatigue_index(telemetry["teams"]["home"])
     away_fatigue = analytics.fatigue_index(telemetry["teams"]["away"])
+    momentum = analytics.momentum_curve(
+        explainer.MATCH_DATA["events"], telemetry["event_weights_for_momentum"]
+    )
     return {
         "offside_probability": analytics.offside_probability(
             offside["margin_cm"], offside["camera_frame_uncertainty_cm"]
@@ -114,10 +120,12 @@ def analytics_endpoint():
                 "weight(e.type) * direction(e) * decay^((t - e.minute) / 5)"
             ),
             "inputs": {"decay": 0.85, "event_weights": telemetry["event_weights_for_momentum"]},
-            "result": analytics.momentum_curve(
-                explainer.MATCH_DATA["events"], telemetry["event_weights_for_momentum"]
-            ),
+            "result": momentum,
+            "summary": analytics.momentum_summary(momentum),
         },
+        "fatigue_comparison": analytics.fatigue_comparison(
+            telemetry["teams"]["home"], telemetry["teams"]["away"]
+        ),
     }
 
 
