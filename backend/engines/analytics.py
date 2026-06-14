@@ -80,11 +80,18 @@ def offside_sensitivity(margin_cm: float, camera_frame_uncertainty_cm: float) ->
 
 
 def counterfactual_timing(margin_cm: float, attacker_speed_ms: float) -> dict:
+    if attacker_speed_ms <= 0:
+        raise ValueError(f"attacker_speed_ms must be positive, got {attacker_speed_ms}")
     delay_needed_ms = (margin_cm / 100) / attacker_speed_ms * 1000
     return {
         "formula": "delay_needed_ms = (margin_cm / 100) / attacker_speed_ms * 1000",
         "inputs": {"margin_cm": margin_cm, "attacker_speed_ms": attacker_speed_ms},
-        "result": {"delay_needed_ms": round(delay_needed_ms, 1)},
+        "result": {
+            "delay_needed_ms": round(delay_needed_ms, 1),
+            "frames_at_50fps": round(delay_needed_ms / 20, 2),
+            "frames_at_25fps": round(delay_needed_ms / 40, 2),
+            "detectable_at_50fps": (delay_needed_ms / 20) >= 1,
+        },
     }
 
 

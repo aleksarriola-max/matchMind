@@ -80,6 +80,18 @@ def test_fatigue_index_home_team():
     assert index[4] == pytest.approx(-2.0, abs=0.1)
 
 
+def test_counterfactual_timing_frame_fields_for_offside_27():
+    result = analytics.counterfactual_timing(11, 7)
+    assert result["result"]["frames_at_50fps"] == pytest.approx(0.79, abs=0.01)
+    assert result["result"]["frames_at_25fps"] == pytest.approx(0.39, abs=0.01)
+    assert result["result"]["detectable_at_50fps"] is False
+
+
+def test_counterfactual_timing_rejects_non_positive_speed():
+    with pytest.raises(ValueError):
+        analytics.counterfactual_timing(11, 0)
+
+
 def test_momentum_curve_shape_and_values():
     events = analytics.MATCH_DATA["events"]
     weights = analytics.TELEMETRY_DATA["event_weights_for_momentum"]
