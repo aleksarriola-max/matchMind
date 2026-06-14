@@ -39,7 +39,7 @@ def match():
         "away": data["away"],
         "score": data["score"],
         "events": data["events"],
-        "momentum": data["momentum"],
+        "momentum": analytics.momentum_curve(data["events"], analytics.TELEMETRY_DATA["event_weights_for_momentum"]),
     }
 
 

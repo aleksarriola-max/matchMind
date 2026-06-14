@@ -148,3 +148,17 @@ def test_analytics_endpoint_has_all_six_models():
     assert "home" in data["fatigue_index"]["result"]
     assert "away" in data["fatigue_index"]["result"]
     assert len(data["momentum_curve"]["result"]) == 19
+
+
+def test_match_momentum_is_computed_curve():
+    response = client.get("/api/match")
+    assert response.status_code == 200
+    data = response.json()
+    momentum = data["momentum"]
+    assert len(momentum) == 19
+    for point in momentum:
+        assert "minute" in point and "value" in point
+    minutes = [p["minute"] for p in momentum]
+    assert minutes == list(range(0, 91, 5))
+    by_minute = {p["minute"]: p["value"] for p in momentum}
+    assert by_minute[20] == pytest.approx(-29.0, abs=0.5)
