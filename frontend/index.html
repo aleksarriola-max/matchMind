@@ -98,6 +98,12 @@
     .debate-cols { display: flex; gap: 16px; margin-top: 12px; }
     .debate-cols > div { flex: 1; background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 12px; }
     .debate-cols h4 { margin-top: 0; }
+    .badge { display: inline-block; padding: 2px 10px; border-radius: 4px; font-size: 0.8em; font-weight: 600; }
+    .badge.verified { background: #1f3d2a; color: #6fd98e; }
+    .badge.unverified { background: #3d2a1f; color: #f0a868; }
+    .confidence-card { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 12px 16px; margin: 12px 0; }
+    .confidence-card .confidence-line { font-size: 1.4em; margin: 0 0 4px; }
+    .lineage { font-family: monospace; color: var(--muted); font-size: 0.8em; margin-top: 16px; }
   </style>
 </head>
 <body>
@@ -151,7 +157,7 @@
         <br>
         <button type="submit">Ask</button>
       </form>
-      <pre id="result"></pre>
+      <div id="result"></div>
     </section>
   </main>
 
@@ -452,42 +458,63 @@
       const persona = document.getElementById('persona').value;
       const language = document.getElementById('language').value;
 
-      const response = await fetch('/api/ask', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question, persona, language }),
-      });
-      const data = await response.json();
+      const result = document.getElementById('result');
+      result.innerHTML = '<p>Loading…</p>';
 
-      const lines = [];
-      lines.push('Answer: ' + data.answer);
-      lines.push('');
-      lines.push('Moment: ' + data.moment_id);
-      lines.push('Confidence: ' + data.explainability.confidence);
-      lines.push('Confidence basis: ' + data.explainability.confidence_basis);
-      lines.push('');
-      lines.push('Sources:');
-      for (const source of data.explainability.sources) {
-        lines.push('  - ' + source.title + ' (' + source.source + ', score ' + source.score + ')');
+      let data;
+      try {
+        const response = await fetch('/api/ask', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question, persona, language }),
+        });
+        if (!response.ok) throw new Error('status ' + response.status);
+        data = await response.json();
+      } catch (err) {
+        result.innerHTML = '<div class="error">Could not get an answer — is the backend running?</div>';
+        return;
       }
-      lines.push('');
-      lines.push('Evidence:');
-      for (const item of data.explainability.evidence) {
-        lines.push('  - ' + item);
-      }
-      if (data.explainability.counterfactual) {
-        lines.push('');
-        lines.push('Counterfactual: ' + data.explainability.counterfactual);
-      }
-      if (data.explainability.debate) {
-        lines.push('');
-        lines.push('Debate (stands): ' + data.explainability.debate.stands);
-        lines.push('Debate (overturn): ' + data.explainability.debate.overturn);
-      }
-      lines.push('');
-      lines.push('Verification: ' + JSON.stringify(data.verification));
 
-      document.getElementById('result').textContent = lines.join('\n');
+      const ex = data.explainability;
+      const v = data.verification;
+
+      let html = '<h2>' + data.answer + '</h2>';
+
+      if (v.verified) {
+        html += '<span class="badge verified">Verified</span> ';
+      } else {
+        html += '<span class="badge unverified">Unverified</span> ';
+      }
+      html += '<span>coverage: ' + Math.round(v.coverage * 100) + '%</span>';
+      if (v.unsupported && v.unsupported.length > 0) {
+        html += '<ul>' + v.unsupported.map(function(s) { return '<li>' + s + '</li>'; }).join('') + '</ul>';
+      }
+
+      html += '<div class="confidence-card">' +
+        '<div class="confidence-line">' + (ex.confidence * 100).toFixed(1) + '%</div>' +
+        '<div>' + ex.confidence_basis + '</div>' +
+        '</div>';
+
+      html += '<h3>Sources</h3><ul>' + ex.sources.map(function(s) {
+        return '<li>' + s.title + ' (' + s.source + ', score ' + s.score.toFixed(2) + ')</li>';
+      }).join('') + '</ul>';
+
+      html += '<h3>Evidence</h3><ul>' + ex.evidence.map(function(e) { return '<li>' + e + '</li>'; }).join('') + '</ul>';
+
+      if (ex.counterfactual) {
+        html += '<div class="callout">' + ex.counterfactual + '</div>';
+      }
+
+      if (ex.debate) {
+        html += '<div class="debate-cols">' +
+          '<div><h4>Stands</h4><p>' + ex.debate.stands + '</p></div>' +
+          '<div><h4>Overturn</h4><p>' + ex.debate.overturn + '</p></div>' +
+          '</div>';
+      }
+
+      html += '<p class="lineage">' + ex.lineage + '</p>';
+
+      result.innerHTML = html;
     });
 
     init();
