@@ -76,6 +76,8 @@
     .analytics-table th, .analytics-table td {
       border: 1px solid var(--border); padding: 6px 12px; text-align: left;
     }
+    .pitch-wrap { background: #0b0b0b; border: 1px solid var(--border); border-radius: 6px; padding: 10px; margin-top: 12px; }
+    .pitch-svg { width: 100%; display: block; }
   </style>
 </head>
 <body>
@@ -240,7 +242,11 @@
 
     function renderMomentDetail(id, moment) {
       const detail = document.getElementById('moment-detail');
-      detail.innerHTML = renderTextMoment(moment);
+      if (moment.pitch) {
+        detail.innerHTML = renderDecisionLab(moment);
+      } else {
+        detail.innerHTML = renderTextMoment(moment);
+      }
     }
 
     function renderTextMoment(moment) {
@@ -280,6 +286,74 @@
           '<p>More fatigued by full-time: ' + cmp.more_fatigued_team + ' (diff ' + cmp.difference[5] + ' pts)</p>';
       }
       return '';
+    }
+
+    function playerCircle(player, fillColor, strokeColor, strokeWidth) {
+      const number = player.label.indexOf('#') >= 0 ? player.label.split('#')[1] : player.label;
+      return '<circle cx="' + player.x + '" cy="' + player.y + '" r="1.6" fill="' + fillColor + '" stroke="' + strokeColor + '" stroke-width="' + strokeWidth + '"/>' +
+        '<text x="' + player.x + '" y="' + (player.y + 0.7) + '" fill="#fff" font-size="1.8" text-anchor="middle">' + number + '</text>';
+    }
+
+    function renderDecisionLab(moment) {
+      const p = moment.pitch;
+      const homeColor = matchData.home.color;
+      const awayColor = matchData.away.color;
+      const lineX = p.offside_line_x;
+
+      let html = '<h2>' + moment.title + '</h2>';
+      if (moment.law) {
+        html += '<div class="law-badge">' + moment.law + '</div>';
+      }
+      html += '<p class="decision">' + moment.decision + '</p>';
+
+      html += '<div class="pitch-wrap"><svg viewBox="-2 -2 104 72" class="pitch-svg">';
+
+      html += '<rect x="-2" y="-2" width="104" height="72" fill="#1a6e38"/>';
+      html += '<g opacity="0.18" fill="#ffffff">';
+      [-2, 18, 38, 58, 78, 98].forEach(function(x) {
+        html += '<rect x="' + x + '" y="-2" width="10" height="72"/>';
+      });
+      html += '</g>';
+
+      html += '<g stroke="#eaf5ee" stroke-width="0.35" fill="none" opacity="0.9">';
+      html += '<rect x="0" y="0" width="100" height="68"/>';
+      html += '<line x1="50" y1="0" x2="50" y2="68"/>';
+      html += '<circle cx="50" cy="34" r="8.7"/>';
+      html += '<circle cx="50" cy="34" r="0.5" fill="#eaf5ee"/>';
+      html += '<rect x="84.3" y="13.8" width="15.7" height="40.3"/>';
+      html += '<rect x="94.8" y="24.8" width="5.2" height="18.3"/>';
+      html += '<circle cx="89.5" cy="34" r="0.5" fill="#eaf5ee"/>';
+      html += '<path d="M 84.3 26.7 A 8.7 8.7 0 0 1 84.3 41.3"/>';
+      html += '<rect x="100" y="30.3" width="1.6" height="7.3" fill="#eaf5ee" opacity="0.5"/>';
+      html += '<rect x="0" y="13.8" width="15.7" height="40.3"/>';
+      html += '<rect x="0" y="24.8" width="5.2" height="18.3"/>';
+      html += '<path d="M 0 1 A 1 1 0 0 1 1 0"/>';
+      html += '<path d="M 100 1 A 1 1 0 0 0 99 0"/>';
+      html += '<path d="M 0 67 A 1 1 0 0 0 1 68"/>';
+      html += '<path d="M 100 67 A 1 1 0 0 1 99 68"/>';
+      html += '</g>';
+
+      html += '<line x1="' + lineX + '" y1="-2" x2="' + lineX + '" y2="70" stroke="#00e0ff" stroke-width="0.5"/>';
+      html += '<line x1="' + lineX + '" y1="-2" x2="' + lineX + '" y2="70" stroke="#00e0ff" stroke-width="1.6" opacity="0.25"/>';
+
+      p.others.forEach(function(o) {
+        const color = o.team === 'home' ? homeColor : awayColor;
+        html += '<circle cx="' + o.x + '" cy="' + o.y + '" r="1.5" fill="' + color + '" stroke="#ffffff" stroke-width="0.2" opacity="0.65"/>';
+      });
+
+      html += '<circle cx="' + p.ball.x + '" cy="' + p.ball.y + '" r="0.9" fill="#fff" stroke="#333" stroke-width="0.15"/>';
+
+      html += playerCircle(p.passer, homeColor, '#ffffff', 0.25);
+      html += playerCircle(p.second_last_defender, awayColor, '#ffffff', 0.25);
+      html += playerCircle(p.attacker, homeColor, '#ff4d4d', 0.4);
+      html += playerCircle(p.keeper, awayColor, '#ffffff', 0.25);
+
+      html += '<circle cx="' + p.assistant_referee.x + '" cy="' + (p.assistant_referee.y + 0.3) + '" r="1" fill="#ffe14d"/>';
+      html += '<text x="' + p.assistant_referee.x + '" y="' + (p.assistant_referee.y - 0.6) + '" fill="#ffe14d" font-size="2" text-anchor="middle">' + p.assistant_referee.label + '</text>';
+
+      html += '</svg></div>';
+
+      return html;
     }
 
     document.getElementById('ask-form').addEventListener('submit', async (event) => {
