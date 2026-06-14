@@ -31,3 +31,14 @@ def test_counterfactual_timing_for_offside_27():
     result = analytics.counterfactual_timing(11, 7)
     assert result["result"]["delay_needed_ms"] == pytest.approx(15.7, abs=0.05)
     assert result["inputs"] == {"margin_cm": 11, "attacker_speed_ms": 7}
+
+
+def test_handball_reaction_for_handball_38():
+    result = analytics.handball_reaction(1.06, 20)
+    assert result["result"]["time_available_ms"] == 53.0
+    assert result["result"]["deficit_ratio"] == pytest.approx(4.72, abs=0.01)
+    assert result["inputs"] == {
+        "deflection_distance_m": 1.06,
+        "ball_speed_ms": 20,
+        "reaction_benchmark_ms": 250,
+    }

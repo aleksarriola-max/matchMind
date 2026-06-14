@@ -56,3 +56,20 @@ def counterfactual_timing(margin_cm: float, attacker_speed_ms: float) -> dict:
         "inputs": {"margin_cm": margin_cm, "attacker_speed_ms": attacker_speed_ms},
         "result": {"delay_needed_ms": round(delay_needed_ms, 1)},
     }
+
+
+def handball_reaction(deflection_distance_m: float, ball_speed_ms: float, reaction_benchmark_ms: float = 250) -> dict:
+    time_available_ms = deflection_distance_m / ball_speed_ms * 1000
+    deficit_ratio = reaction_benchmark_ms / time_available_ms
+    return {
+        "formula": "time_available_ms = deflection_distance_m / ball_speed_ms * 1000; deficit_ratio = reaction_benchmark_ms / time_available_ms",
+        "inputs": {
+            "deflection_distance_m": deflection_distance_m,
+            "ball_speed_ms": ball_speed_ms,
+            "reaction_benchmark_ms": reaction_benchmark_ms,
+        },
+        "result": {
+            "time_available_ms": round(time_available_ms, 1),
+            "deficit_ratio": round(deficit_ratio, 2),
+        },
+    }
