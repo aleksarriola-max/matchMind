@@ -121,3 +121,19 @@ def fatigue_index(team_telemetry: dict) -> dict:
             "fatigue_index": index,
         },
     }
+
+
+def momentum_curve(events: list, event_weights: dict, decay: float = 0.85) -> list:
+    minutes = range(0, 91, 5)
+    curve = []
+    for t in minutes:
+        value = 0.0
+        for event in events:
+            if event["minute"] <= t:
+                weight = event_weights[event["type"]]
+                direction = 1 if event["team"] == "home" else -1
+                if event["type"] == "pressure":
+                    direction = -direction
+                value += weight * direction * decay ** ((t - event["minute"]) / 5)
+        curve.append({"minute": t, "value": round(value, 1)})
+    return curve

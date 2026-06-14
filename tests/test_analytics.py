@@ -60,3 +60,18 @@ def test_fatigue_index_home_team():
     index = result["result"]["fatigue_index"]
     assert len(index) == 6
     assert index[4] == pytest.approx(-2.0, abs=0.1)
+
+
+def test_momentum_curve_shape_and_values():
+    events = analytics.MATCH_DATA["events"]
+    weights = analytics.TELEMETRY_DATA["event_weights_for_momentum"]
+    curve = analytics.momentum_curve(events, weights)
+    assert len(curve) == 19
+    minutes = [p["minute"] for p in curve]
+    assert minutes == list(range(0, 91, 5))
+    by_minute = {p["minute"]: p["value"] for p in curve}
+    assert by_minute[15] == 0
+    assert by_minute[20] == pytest.approx(-29.0, abs=0.5)
+    assert by_minute[65] == pytest.approx(24.6, abs=0.5)
+    assert by_minute[90] == pytest.approx(41.0, abs=0.5)
+    assert by_minute[65] < by_minute[90]
