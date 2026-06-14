@@ -145,3 +145,14 @@ def test_momentum_curve_shape_and_values():
     assert by_minute[65] == pytest.approx(24.6, abs=0.5)
     assert by_minute[90] == pytest.approx(41.0, abs=0.5)
     assert by_minute[65] < by_minute[90]
+
+
+def test_fatigue_comparison_demo_telemetry():
+    home = analytics.TELEMETRY_DATA["teams"]["home"]
+    away = analytics.TELEMETRY_DATA["teams"]["away"]
+    result = analytics.fatigue_comparison(home, away)
+    assert result["result"]["difference"] == pytest.approx(
+        [-0.2, 0.2, 12.6, 26.4, 42.7, 56.1], abs=0.1
+    )
+    assert result["result"]["more_fatigued_team"] == "away"
+    assert result["inputs"] == {"home": home, "away": away}
