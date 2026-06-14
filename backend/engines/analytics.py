@@ -73,3 +73,51 @@ def handball_reaction(deflection_distance_m: float, ball_speed_ms: float, reacti
             "deficit_ratio": round(deficit_ratio, 2),
         },
     }
+
+
+def fatigue_index(team_telemetry: dict) -> dict:
+    sprints = team_telemetry["sprints"]
+    line_gap = team_telemetry["line_gap_def_mid_m"]
+    long_pass = team_telemetry["long_pass_share"]
+    ppda = team_telemetry["ppda"]
+
+    baseline_sprints = (sprints[0] + sprints[1]) / 2
+    baseline_line_gap = (line_gap[0] + line_gap[1]) / 2
+    baseline_long_pass = (long_pass[0] + long_pass[1]) / 2
+    baseline_ppda = (ppda[0] + ppda[1]) / 2
+
+    sprint_decline = []
+    line_stretch = []
+    long_pass_drift = []
+    pressing_decay = []
+    index = []
+    for i in range(len(sprints)):
+        sd = (baseline_sprints - sprints[i]) / baseline_sprints
+        ls = (line_gap[i] - baseline_line_gap) / baseline_line_gap
+        lpd = (long_pass[i] - baseline_long_pass) / baseline_long_pass
+        pd = (ppda[i] - baseline_ppda) / baseline_ppda
+        sprint_decline.append(round(sd, 4))
+        line_stretch.append(round(ls, 4))
+        long_pass_drift.append(round(lpd, 4))
+        pressing_decay.append(round(pd, 4))
+        index.append(round(100 * (sd + ls + lpd + pd) / 4, 1))
+
+    return {
+        "formula": (
+            "fatigue_index[i] = 100 * mean(sprint_decline[i], line_stretch[i], "
+            "long_pass_drift[i], pressing_decay[i]); baselines = mean(window0, window1)"
+        ),
+        "inputs": {
+            "sprints": sprints,
+            "line_gap_def_mid_m": line_gap,
+            "long_pass_share": long_pass,
+            "ppda": ppda,
+        },
+        "result": {
+            "sprint_decline": sprint_decline,
+            "line_stretch": line_stretch,
+            "long_pass_drift": long_pass_drift,
+            "pressing_decay": pressing_decay,
+            "fatigue_index": index,
+        },
+    }

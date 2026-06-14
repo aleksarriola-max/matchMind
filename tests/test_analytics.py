@@ -42,3 +42,21 @@ def test_handball_reaction_for_handball_38():
         "ball_speed_ms": 20,
         "reaction_benchmark_ms": 250,
     }
+
+
+def test_fatigue_index_away_team():
+    telemetry = analytics.TELEMETRY_DATA["teams"]["away"]
+    result = analytics.fatigue_index(telemetry)
+    index = result["result"]["fatigue_index"]
+    assert len(index) == 6
+    assert index[2] == pytest.approx(12.1, abs=0.1)
+    assert index[4] == pytest.approx(40.7, abs=0.1)
+    assert index[5] == pytest.approx(54.6, abs=0.1)
+
+
+def test_fatigue_index_home_team():
+    telemetry = analytics.TELEMETRY_DATA["teams"]["home"]
+    result = analytics.fatigue_index(telemetry)
+    index = result["result"]["fatigue_index"]
+    assert len(index) == 6
+    assert index[4] == pytest.approx(-2.0, abs=0.1)
