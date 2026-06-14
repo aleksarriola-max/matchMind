@@ -208,6 +208,9 @@ def fatigue_comparison(home_telemetry: dict, away_telemetry: dict) -> dict:
 
 
 def momentum_curve(events: list, event_weights: dict, decay: float = 0.85) -> list:
+    for event in events:
+        if event["type"] not in event_weights:
+            raise ValueError(f"Unknown event type {event['type']!r} — not found in event_weights")
     minutes = range(0, 91, 5)
     curve = []
     for t in minutes:

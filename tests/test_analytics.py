@@ -147,6 +147,13 @@ def test_momentum_curve_shape_and_values():
     assert by_minute[65] < by_minute[90]
 
 
+def test_momentum_curve_rejects_unknown_event_type():
+    events = [{"minute": 10, "type": "not_a_real_type", "team": "home"}]
+    weights = analytics.TELEMETRY_DATA["event_weights_for_momentum"]
+    with pytest.raises(ValueError):
+        analytics.momentum_curve(events, weights)
+
+
 def test_fatigue_comparison_demo_telemetry():
     home = analytics.TELEMETRY_DATA["teams"]["home"]
     away = analytics.TELEMETRY_DATA["teams"]["away"]
