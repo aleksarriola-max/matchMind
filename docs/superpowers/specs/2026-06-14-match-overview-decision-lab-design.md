@@ -168,8 +168,8 @@ Then, if `analytics` is not `null`, append a small "Computed analytics" definiti
 - **`handball_38`** — from `analytics.handball_reaction`:
   `"Ball reaches the point of contact in {result.time_available_ms}ms — {result.deficit_ratio}x faster than the {inputs.reaction_benchmark_ms}ms human reaction benchmark ({result.verdict})."`
 
-- **`fatigue_71`** — from `analytics.fatigue_index.home.result` / `.away.result` and `analytics.fatigue_comparison.result`:
-  A small table with one row per team: `Team | Trend | Peak window` (values: `home.name`/`away.name`, `trend`, `peak_window`), followed by: `"More fatigued by full-time: {more_fatigued_team} (diff {difference[5]} pts)"`.
+- **`fatigue_71`** — from `analytics.fatigue_index.home` / `.away` and `analytics.fatigue_comparison` (these are already unwrapped `result` dicts server-side — no further `.result` nesting):
+  A small table with one row per team: `Team | Trend | Peak window` (values: `home.name`/`away.name`, `analytics.fatigue_index.<side>.trend`, `analytics.fatigue_index.<side>.peak_window`), followed by: `"More fatigued by full-time: {analytics.fatigue_comparison.more_fatigued_team} (diff {analytics.fatigue_comparison.difference[5]} pts)"`.
 
 - `halftime_shift`, `sub_58`, `goal_home_1`, `goal_home_2` have `analytics: null` — no extra block.
 
