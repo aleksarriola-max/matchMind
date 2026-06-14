@@ -94,3 +94,26 @@ def test_handball_38_has_reaction_inputs():
     moment = data["moments"]["handball_38"]
     assert moment["deflection_distance_m"] == 1.06
     assert moment["ball_speed_ms"] == 20
+
+
+TELEMETRY_PATH = Path(__file__).resolve().parent.parent / "backend" / "data" / "telemetry.json"
+
+
+def load_telemetry():
+    with open(TELEMETRY_PATH, encoding="utf-8") as f:
+        return json.load(f)
+
+
+def test_telemetry_schema():
+    data = load_telemetry()
+    assert data["windows"] == ["0-15", "15-30", "30-45", "45-60", "60-75", "75-90"]
+    for team in ["home", "away"]:
+        for metric in ["sprints", "line_gap_def_mid_m", "long_pass_share", "ppda"]:
+            assert len(data["teams"][team][metric]) == 6
+    assert data["event_weights_for_momentum"] == {
+        "goal": 30,
+        "var_review": 15,
+        "tactical": 5,
+        "substitution": 3,
+        "pressure": 10,
+    }
