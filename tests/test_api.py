@@ -30,7 +30,7 @@ def test_match():
 def test_moment_found():
     response = client.get("/api/moment/offside_27")
     assert response.status_code == 200
-    assert response.json()["title"].startswith("Atlántica goal disallowed")
+    assert response.json()["title"].startswith("Argentina goal disallowed")
 
 
 def test_moment_not_found():
@@ -97,7 +97,7 @@ MOMENT_QUESTIONS = {
     "halftime_shift": "Why did the team switch from a 4-3-3 to a 4-4-2 formation at halftime?",
     "sub_58": "Why did they make a substitution and bring on a fresh winger in the 58th minute?",
     "goal_home_1": "How did the equaliser happen to make it 1-1?",
-    "fatigue_71": "Why did Borealia's pressing collapse due to fatigue late on?",
+    "fatigue_71": "Why did France's pressing collapse due to fatigue late on?",
     "goal_home_2": "How was the winning goal scored from the corner?",
 }
 

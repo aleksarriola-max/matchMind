@@ -2,27 +2,27 @@
   "match_id": "wc2026-final-demo",
   "competition": "FIFA World Cup 2026 (Demo Fixture)",
   "home": {
-    "name": "Atlántica",
-    "color": "#0B5FA5",
+    "name": "Argentina",
+    "color": "#75AADB",
     "formation_start": "4-3-3",
     "formation_end": "4-4-2"
   },
   "away": {
-    "name": "Borealia",
-    "color": "#C8102E",
+    "name": "France",
+    "color": "#0055A4",
     "formation_start": "4-2-3-1",
     "formation_end": "4-2-3-1"
   },
   "score": {"home": 2, "away": 1},
   "events": [
-    {"minute": 19, "type": "goal", "team": "away", "desc": "Borealia open the scoring with a counter-attack finish to make it 0-1."},
-    {"minute": 27, "type": "var_review", "team": "home", "id": "offside_27", "desc": "Atlántica's goal is disallowed after a VAR review for offside."},
-    {"minute": 38, "type": "var_review", "team": "away", "id": "handball_38", "desc": "Borealia's penalty appeal for handball is rejected."},
-    {"minute": 46, "type": "tactical", "team": "home", "id": "halftime_shift", "desc": "Atlántica switch from a 4-3-3 to a 4-4-2 at the start of the second half."},
-    {"minute": 58, "type": "substitution", "team": "home", "id": "sub_58", "desc": "Atlántica bring on a fresh right winger."},
-    {"minute": 63, "type": "goal", "team": "home", "id": "goal_home_1", "desc": "Atlántica equalise to make it 1-1 from a left-side overload."},
-    {"minute": 71, "type": "pressure", "team": "away", "id": "fatigue_71", "desc": "Borealia's pressing intensity collapses as fatigue sets in."},
-    {"minute": 84, "type": "goal", "team": "home", "id": "goal_home_2", "desc": "Atlántica score the 2-1 winner from a second-phase corner."}
+    {"minute": 19, "type": "goal", "team": "away", "desc": "France open the scoring with a counter-attack finish to make it 0-1."},
+    {"minute": 27, "type": "var_review", "team": "home", "id": "offside_27", "desc": "Argentina's goal is disallowed after a VAR review for offside."},
+    {"minute": 38, "type": "var_review", "team": "away", "id": "handball_38", "desc": "France's penalty appeal for handball is rejected."},
+    {"minute": 46, "type": "tactical", "team": "home", "id": "halftime_shift", "desc": "Argentina switch from a 4-3-3 to a 4-4-2 at the start of the second half."},
+    {"minute": 58, "type": "substitution", "team": "home", "id": "sub_58", "desc": "Argentina bring on a fresh right winger."},
+    {"minute": 63, "type": "goal", "team": "home", "id": "goal_home_1", "desc": "Argentina equalise to make it 1-1 from a left-side overload."},
+    {"minute": 71, "type": "pressure", "team": "away", "id": "fatigue_71", "desc": "France's pressing intensity collapses as fatigue sets in."},
+    {"minute": 84, "type": "goal", "team": "home", "id": "goal_home_2", "desc": "Argentina score the 2-1 winner from a second-phase corner."}
   ],
   "momentum": [
     {"minute": 0, "value": 5},
@@ -47,21 +47,21 @@
   ],
   "moments": {
     "offside_27": {
-      "title": "Atlántica goal disallowed — offside, 27'",
+      "title": "Argentina goal disallowed — offside, 27'",
       "law": "Law 11 — Offside Offence",
       "decision": "Goal disallowed for offside",
       "confidence": 0.997,
       "margin_cm": 11,
       "camera_frame_uncertainty_cm": 6,
       "attacker_speed_ms": 7,
-      "summary": "In the 27th minute, Atlántica's striker received a through ball and finished from close range, but the assistant referee's onside call was overturned after a VAR review measured the striker 11 cm beyond the second-last Borealia defender at the moment the ball was played.",
+      "summary": "In the 27th minute, Argentina's striker received a through ball and finished from close range, but the assistant referee's onside call was overturned after a VAR review measured the striker 11 cm beyond the second-last France defender at the moment the ball was played.",
       "pitch": {
         "offside_line_x": 72.0,
         "ball": {"x": 60.0, "y": 34.0},
-        "passer": {"x": 58.0, "y": 30.0, "label": "Atlántica #8"},
-        "attacker": {"x": 72.11, "y": 36.0, "label": "Atlántica #9", "offside": true},
-        "second_last_defender": {"x": 72.0, "y": 35.5, "label": "Borealia #4"},
-        "keeper": {"x": 100.0, "y": 34.0, "label": "Borealia #1"},
+        "passer": {"x": 58.0, "y": 30.0, "label": "Argentina #8"},
+        "attacker": {"x": 72.11, "y": 36.0, "label": "Argentina #9", "offside": true},
+        "second_last_defender": {"x": 72.0, "y": 35.5, "label": "France #4"},
+        "keeper": {"x": 100.0, "y": 34.0, "label": "France #1"},
         "others": [
           {"x": 65.0, "y": 20.0, "team": "home"},
           {"x": 68.0, "y": 50.0, "team": "away"},
@@ -72,7 +72,7 @@
       "evidence": [
         "Law 11 defines offside as any part of the head, body, or feet being nearer to the opponents' goal line than both the ball and the second-last opponent when the ball is played.",
         "This disallowed goal occurred in the 27th minute.",
-        "Semi-automated offside technology measured the attacker 11 cm beyond the second-last Borealia defender at the moment the pass was played.",
+        "Semi-automated offside technology measured the attacker 11 cm beyond the second-last France defender at the moment the pass was played.",
         "Camera frame uncertainty for the tracking system is approximately 6 cm, and limb-line placement uncertainty is approximately 2.5 cm.",
         "Combining these uncertainties gives roughly 99.7% confidence that the attacker was genuinely in an offside position."
       ],
@@ -90,7 +90,7 @@
       "confidence": 0.74,
       "deflection_distance_m": 1.06,
       "ball_speed_ms": 20,
-      "summary": "In the 38th minute, a deflected shot struck a Borealia defender's arm inside the penalty area. The referee ruled no penalty, judging the contact accidental because the defender had no realistic time to avoid it.",
+      "summary": "In the 38th minute, a deflected shot struck a France defender's arm inside the penalty area. The referee ruled no penalty, judging the contact accidental because the defender had no realistic time to avoid it.",
       "evidence": [
         "Law 12 does not penalize the ball touching a player's hand or arm if the contact is accidental and the player had no realistic chance to avoid it.",
         "In the 38th-minute penalty appeal, the deflection reached the defender's arm in approximately 53 ms.",
@@ -105,11 +105,11 @@
       }
     },
     "halftime_shift": {
-      "title": "Atlántica switch from 4-3-3 to 4-4-2 at halftime",
+      "title": "Argentina switch from 4-3-3 to 4-4-2 at halftime",
       "law": null,
       "decision": "Tactical reshape — no officiating decision",
       "confidence": 0.6,
-      "summary": "Trailing 0-1 at the break, Atlántica's coaching staff switched from a 4-3-3 to a 4-4-2 at the 46th minute, adding a second central striker and a flatter four-man midfield line to compress space and create more direct support up front.",
+      "summary": "Trailing 0-1 at the break, Argentina's coaching staff switched from a 4-3-3 to a 4-4-2 at the 46th minute, adding a second central striker and a flatter four-man midfield line to compress space and create more direct support up front.",
       "evidence": [
         "A 4-3-3 emphasizes width and front-foot pressing with three forwards, but can be bypassed centrally if the front three are stretched.",
         "A 4-4-2 adds a second banked line of four in midfield, tightening central areas at some cost to width in the final third.",
@@ -120,13 +120,13 @@
       "debate": null
     },
     "sub_58": {
-      "title": "Atlántica winger substitution, 58'",
+      "title": "Argentina winger substitution, 58'",
       "law": null,
       "decision": "Tactical substitution — like-for-like wide change",
       "confidence": 0.55,
-      "summary": "In the 58th minute, Atlántica replaced their right winger with a fresh attacker of the same profile, aiming to exploit Borealia's tiring left side with renewed pace and directness on that flank.",
+      "summary": "In the 58th minute, Argentina replaced their right winger with a fresh attacker of the same profile, aiming to exploit France's tiring left side with renewed pace and directness on that flank.",
       "evidence": [
-        "In the 58th minute, Atlántica replaced their right winger with a fresh attacker of the same profile.",
+        "In the 58th minute, Argentina replaced their right winger with a fresh attacker of the same profile.",
         "Introducing a fresh winger after the 55th minute typically targets a fatigued opposing full-back, since sprint output for wide defenders declines fastest in the second half.",
         "A like-for-like wide substitution preserves the team's attacking shape while restoring pace and directness on that flank."
       ],
@@ -135,13 +135,13 @@
       "debate": null
     },
     "goal_home_1": {
-      "title": "Atlántica equalise 1-1 — left-side overload, 63'",
+      "title": "Argentina equalise 1-1 — left-side overload, 63'",
       "law": null,
       "decision": "Goal — left-side overload",
       "confidence": 0.7,
-      "summary": "In the 63rd minute, Atlántica overloaded the left flank with their full-back, winger, and a central midfielder, drawing Borealia's right-back out of position and creating a clear passing lane for a low cutback that was finished to make it 1-1.",
+      "summary": "In the 63rd minute, Argentina overloaded the left flank with their full-back, winger, and a central midfielder, drawing France's right-back out of position and creating a clear passing lane for a low cutback that was finished to make it 1-1.",
       "evidence": [
-        "In the 63rd minute, Atlántica scored to make it 1-1 from a left-side overload.",
+        "In the 63rd minute, Argentina scored to make it 1-1 from a left-side overload.",
         "A left-side overload occurs when a fullback, winger, and a midfielder combine on one flank to create a numerical advantage of three attackers against two defenders.",
         "This typically draws an opposing fullback out of position, opening a passing lane into the box for a low cross or cutback finish."
       ],
@@ -150,13 +150,13 @@
       "debate": null
     },
     "fatigue_71": {
-      "title": "Borealia's pressing collapses — fatigue, 71'",
+      "title": "France's pressing collapses — fatigue, 71'",
       "law": null,
       "decision": "Physical and tactical fatigue signature",
       "confidence": 0.65,
-      "summary": "From the 71st minute, Borealia's pressing intensity dropped sharply, with players covering less ground per press and the defensive line dropping deeper, consistent with a late-game fatigue signature.",
+      "summary": "From the 71st minute, France's pressing intensity dropped sharply, with players covering less ground per press and the defensive line dropping deeper, consistent with a late-game fatigue signature.",
       "evidence": [
-        "In the 71st minute, Borealia's pressing intensity dropped sharply as their sprint output and line compactness both declined, a classic late-game fatigue signature.",
+        "In the 71st minute, France's pressing intensity dropped sharply as their sprint output and line compactness both declined, a classic late-game fatigue signature.",
         "Passes Per Defensive Action, or PPDA, measures pressing intensity; a rising PPDA in the final 15-20 minutes indicates a team is pressing less aggressively, usually due to fatigue.",
         "Sprint counts typically decline by 20-30% in the final 15 minutes compared with the first half for teams that have committed heavily to pressing."
       ],
@@ -165,13 +165,13 @@
       "debate": null
     },
     "goal_home_2": {
-      "title": "Atlántica score the 2-1 winner — second-phase corner, 84'",
+      "title": "Argentina score the 2-1 winner — second-phase corner, 84'",
       "law": null,
       "decision": "Goal — second-phase corner routine",
       "confidence": 0.7,
-      "summary": "In the 84th minute, Atlántica won a corner that was only partially cleared; an attacker positioned for the second phase struck the loose ball first time to make it 2-1.",
+      "summary": "In the 84th minute, Argentina won a corner that was only partially cleared; an attacker positioned for the second phase struck the loose ball first time to make it 2-1.",
       "evidence": [
-        "In the 84th minute, Atlántica scored the 2-1 winner from a second-phase corner routine.",
+        "In the 84th minute, Argentina scored the 2-1 winner from a second-phase corner routine.",
         "A second-phase routine targets the rebound after the first header from a corner is only partially cleared, with attackers positioned just outside the penalty area to strike a loose ball first time.",
         "Teams that commit six or more players to a corner increase their second-phase shot probability significantly."
       ],

@@ -11,7 +11,7 @@ ball is played. Camera frame uncertainty for this tracking is approximately
 6 cm, and limb-line placement uncertainty is approximately 2.5 cm.
 
 For the disallowed goal in the 27th minute, semi-automated offside
-technology measured the attacker 11 cm beyond the second-last Borealia
+technology measured the attacker 11 cm beyond the second-last France
 defender at the moment the pass was played. Combining the 6 cm camera frame
 uncertainty with the 2.5 cm limb-line uncertainty gives roughly 99.7%
 confidence that the attacker was genuinely in an offside position.
@@ -54,7 +54,7 @@ in the final third.
 
 Teams trailing at halftime often switch from a 4-3-3 to a 4-4-2 to add a
 second central striker for direct support and to compress the space between
-lines, as Atlántica did at the start of the second half.
+lines, as Argentina did at the start of the second half.
 
 ## Substitutions and Game Management
 
@@ -63,9 +63,9 @@ fatigued opposing full-back, since sprint output for wide defenders declines
 fastest in the second half. A like-for-like wide substitution preserves a
 team's attacking shape while restoring pace and directness on that flank.
 
-In the 58th minute, Atlántica made exactly this kind of substitution,
+In the 58th minute, Argentina made exactly this kind of substitution,
 replacing their right winger with a fresh attacker of the same profile to
-keep pressing Borealia's tiring left side.
+keep pressing France's tiring left side.
 
 ## Wide Overloads and Attacking Patterns
 
@@ -75,8 +75,8 @@ against two defenders. This typically draws an opposing fullback out of
 position, opening a passing lane into the box for a low cross or cutback
 finish.
 
-In the 63rd minute, Atlántica created exactly this kind of left-side
-overload, drawing Borealia's right-back out of position and scoring to make
+In the 63rd minute, Argentina created exactly this kind of left-side
+overload, drawing France's right-back out of position and scoring to make
 it 1-1.
 
 ## Set-Piece and Second-Phase Routines
@@ -87,7 +87,7 @@ penalty area to strike the loose ball first time. Teams that commit six or
 more players to a corner increase their second-phase shot probability
 significantly.
 
-In the 84th minute, Atlántica scored the 2-1 winner from exactly this kind
+In the 84th minute, Argentina scored the 2-1 winner from exactly this kind
 of second-phase corner routine.
 
 ## Fatigue, Pressing Intensity, and Late-Game Decline
@@ -98,7 +98,7 @@ aggressively, usually due to fatigue. Sprint counts typically decline by
 20-30% in the final 15 minutes compared with the first half for teams that
 have committed heavily to pressing.
 
-In the 71st minute, Borealia's pressing intensity dropped sharply as their
+In the 71st minute, France's pressing intensity dropped sharply as their
 sprint output and line compactness both declined — a classic late-game
 fatigue signature.
 

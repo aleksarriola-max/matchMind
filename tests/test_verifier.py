@@ -2,7 +2,7 @@ from backend.engines.verifier import verify
 
 EVIDENCE = [
     "Law 11 defines offside as any part of the head, body, or feet being nearer to the opponents' goal line than both the ball and the second-last opponent when the ball is played.",
-    "Semi-automated offside technology measured the attacker 11 cm beyond the second-last Borealia defender at the moment the pass was played.",
+    "Semi-automated offside technology measured the attacker 11 cm beyond the second-last France defender at the moment the pass was played.",
     "Combining these uncertainties gives roughly 99.7% confidence that the attacker was genuinely in an offside position.",
 ]
 
@@ -18,7 +18,7 @@ def test_grounded_answer_is_verified():
 
 
 def test_fabricated_number_is_flagged():
-    answer = "Semi-automated offside technology measured the attacker 55 cm beyond the second-last Borealia defender."
+    answer = "Semi-automated offside technology measured the attacker 55 cm beyond the second-last France defender."
     result = verify(answer, EVIDENCE)
     assert result["verified"] is False
     assert result["unsupported"] == [answer]

@@ -112,7 +112,7 @@ docs/                   architecture, methodology & evaluation, build plan,
                         demo script, LangFlow guide
 ```
 
-*Demo fixture uses fictional teams (Atlántica vs Borealia) and demo telemetry; all rule content paraphrases the IFAB Laws of the Game.*
+*Demo fixture uses a sample match (Argentina vs France) and demo telemetry; all rule content paraphrases the IFAB Laws of the Game.*
 
 ## Build status
 

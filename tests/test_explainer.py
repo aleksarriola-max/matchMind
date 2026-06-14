@@ -23,7 +23,7 @@ def test_route_goal_home_1():
 
 
 def test_route_fatigue():
-    assert explainer.route("Why did Borealia's pressing collapse due to fatigue late on?") == "fatigue_71"
+    assert explainer.route("Why did France's pressing collapse due to fatigue late on?") == "fatigue_71"
 
 
 def test_route_goal_home_2():
@@ -40,7 +40,7 @@ def test_route_tie_breaks_to_lowest_minute():
 
 def test_ground_returns_moment_and_retrieved_for_routed_question():
     result = explainer.ground("Why was the goal disallowed for offside in the 27th minute?", "offside_27")
-    assert result["moment"]["title"].startswith("Atlántica goal disallowed")
+    assert result["moment"]["title"].startswith("Argentina goal disallowed")
     assert len(result["retrieved"]) == 3
 
 
@@ -98,7 +98,7 @@ def test_explain_for_general_question():
 
 
 def test_explain_schema_has_all_required_keys():
-    grounded = explainer.ground("Why did Borealia's pressing collapse due to fatigue late on?", "fatigue_71")
+    grounded = explainer.ground("Why did France's pressing collapse due to fatigue late on?", "fatigue_71")
     answer = explainer.compose_demo("coach", grounded["moment"], grounded["retrieved"])
     verification = verify(answer, grounded["moment"]["evidence"])
     result = explainer.explain("fatigue_71", grounded["moment"], grounded["retrieved"], verification)

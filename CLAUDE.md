@@ -96,7 +96,7 @@ backend/
                                 momentum reconstruction, counterfactual, handball reaction,
                                 sensitivity analysis)
   data/
-    sample_match.json           Demo fixture (Atlántica 2-1 Borealia) + moment dossiers
+    sample_match.json           Demo fixture (Argentina 2-1 France) + moment dossiers
     historical_incidents.json   Real World Cup incidents 1986-2022 (6 incidents)
     telemetry.json              Per-15min windowed physical/positional data (both teams)
     knowledge/
@@ -184,11 +184,11 @@ requirements.txt                fastapi · uvicorn · pydantic (docling + ibm-wa
 
 | ID | Minute | What happened |
 |----|--------|---------------|
-| `offside_27` | 27' | Atlántica goal disallowed, 11 cm margin — has pitch geometry + offside model |
+| `offside_27` | 27' | Argentina goal disallowed, 11 cm margin — has pitch geometry + offside model |
 | `handball_38` | 38' | Penalty appeal rejected — has handball reaction model |
-| `halftime_shift` | 46' | Atlántica 4-3-3 -> 4-4-2, no analytics model |
-| `fatigue_71` | 71' | Borealia collapse — has fatigue index model |
-| `sub_58` | 58' | Atlántica winger substitution |
+| `halftime_shift` | 46' | Argentina 4-3-3 -> 4-4-2, no analytics model |
+| `fatigue_71` | 71' | France collapse — has fatigue index model |
+| `sub_58` | 58' | Argentina winger substitution |
 | `goal_home_1` | 63' | 1-1 equaliser from left overload |
 | `goal_home_2` | 84' | 2-1 winner from second-phase corner |
 
@@ -287,7 +287,7 @@ verify(answer: str, evidence_texts: list[str]) -> dict
 ```
 
 Known blind spots (documented in evals/redteam_results.json):
-- Entity-swap attacks (e.g. "Borealia" -> "Atlántica") pass lexical check if both
+- Entity-swap attacks (e.g. "France" -> "Argentina") pass lexical check if both
   names appear in evidence. The Granite pass catches these.
 - Paraphrase/negation: lexical overlap is high even for inverted claims.
 
