@@ -43,12 +43,44 @@ def match():
     }
 
 
+def _moment_analytics(moment_id: str, moment: dict) -> dict | None:
+    if moment_id == "offside_27":
+        return {
+            "offside_probability": analytics.offside_probability(
+                moment["margin_cm"], moment["camera_frame_uncertainty_cm"]
+            ),
+            "offside_sensitivity": analytics.offside_sensitivity(
+                moment["margin_cm"], moment["camera_frame_uncertainty_cm"]
+            ),
+            "counterfactual_timing": analytics.counterfactual_timing(
+                moment["margin_cm"], moment["attacker_speed_ms"]
+            ),
+        }
+    if moment_id == "handball_38":
+        return {
+            "handball_reaction": analytics.handball_reaction(
+                moment["deflection_distance_m"], moment["ball_speed_ms"]
+            ),
+        }
+    if moment_id == "fatigue_71":
+        telemetry = analytics.TELEMETRY_DATA
+        return {
+            "fatigue_index": {
+                "home": analytics.fatigue_index(telemetry["teams"]["home"])["result"],
+                "away": analytics.fatigue_index(telemetry["teams"]["away"])["result"],
+            },
+        }
+    return None
+
+
 @app.get("/api/moment/{moment_id}")
 def moment(moment_id: str):
     moments = explainer.MATCH_DATA["moments"]
     if moment_id not in moments:
         raise HTTPException(status_code=404, detail=f"Unknown moment id: {moment_id!r}")
-    return moments[moment_id]
+    result = dict(moments[moment_id])
+    result["analytics"] = _moment_analytics(moment_id, moments[moment_id])
+    return result
 
 
 @app.get("/api/analytics")

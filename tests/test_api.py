@@ -162,3 +162,42 @@ def test_match_momentum_is_computed_curve():
     assert minutes == list(range(0, 91, 5))
     by_minute = {p["minute"]: p["value"] for p in momentum}
     assert by_minute[20] == pytest.approx(-29.0, abs=0.5)
+
+
+def test_moment_offside_27_has_analytics():
+    response = client.get("/api/moment/offside_27")
+    assert response.status_code == 200
+    data = response.json()
+    analytics_data = data["analytics"]
+    for key in ["offside_probability", "offside_sensitivity", "counterfactual_timing"]:
+        assert key in analytics_data, key
+    assert analytics_data["offside_probability"]["result"]["probability"] == pytest.approx(0.997, abs=0.001)
+
+
+def test_moment_handball_38_has_analytics():
+    response = client.get("/api/moment/handball_38")
+    assert response.status_code == 200
+    data = response.json()
+    assert "handball_reaction" in data["analytics"]
+    assert data["analytics"]["handball_reaction"]["result"]["time_available_ms"] == 53.0
+
+
+def test_moment_fatigue_71_has_analytics():
+    response = client.get("/api/moment/fatigue_71")
+    assert response.status_code == 200
+    data = response.json()
+    fatigue = data["analytics"]["fatigue_index"]
+    assert "home" in fatigue and "away" in fatigue
+    assert fatigue["away"]["fatigue_index"][4] == pytest.approx(40.7, abs=0.1)
+
+
+def test_moment_halftime_shift_has_null_analytics():
+    response = client.get("/api/moment/halftime_shift")
+    assert response.status_code == 200
+    assert response.json()["analytics"] is None
+
+
+def test_moment_sub_58_has_null_analytics():
+    response = client.get("/api/moment/sub_58")
+    assert response.status_code == 200
+    assert response.json()["analytics"] is None
