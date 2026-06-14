@@ -57,6 +57,25 @@
       border-radius: 4px; padding: 2px 6px;
     }
     .error { color: #ff6b6b; padding: 20px; }
+    .moments-layout { display: flex; gap: 20px; align-items: flex-start; }
+    .moments-sidebar { list-style: none; padding: 0; margin: 0; min-width: 200px; }
+    .moments-sidebar li { margin-bottom: 6px; }
+    .moments-sidebar button {
+      width: 100%; text-align: left; background: var(--panel);
+      border: 1px solid var(--border); color: var(--text);
+      padding: 10px 12px; border-radius: 4px; cursor: pointer; font-size: 0.95em;
+    }
+    .moments-sidebar button.active { border-color: var(--accent); color: var(--accent); }
+    .moment-detail { flex: 1; min-width: 0; }
+    .law-badge {
+      display: inline-block; background: var(--border); color: var(--muted);
+      border-radius: 4px; padding: 4px 10px; font-size: 0.85em; margin-bottom: 8px;
+    }
+    .confidence-line { color: var(--accent); font-weight: 600; }
+    .analytics-table { border-collapse: collapse; margin: 8px 0; }
+    .analytics-table th, .analytics-table td {
+      border: 1px solid var(--border); padding: 6px 12px; text-align: left;
+    }
   </style>
 </head>
 <body>
@@ -130,6 +149,7 @@
       document.documentElement.style.setProperty('--away', matchData.away.color);
       renderHeader();
       renderOverview();
+      buildMomentsSidebar();
       setupTabs();
     }
 
@@ -159,6 +179,8 @@
       }).join('');
     }
 
+    let momentsInitialized = false;
+
     function setupTabs() {
       document.querySelectorAll('nav.tabs button').forEach(function(btn) {
         btn.addEventListener('click', function() {
@@ -166,8 +188,98 @@
           document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
           btn.classList.add('active');
           document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+          if (btn.dataset.tab === 'moments' && !momentsInitialized) {
+            momentsInitialized = true;
+            selectMoment('offside_27');
+          }
         });
       });
+    }
+
+    const MOMENT_ORDER = ['offside_27', 'handball_38', 'halftime_shift', 'sub_58', 'goal_home_1', 'fatigue_71', 'goal_home_2'];
+    const MOMENT_LABELS = {
+      offside_27: "27' Offside review",
+      handball_38: "38' Handball review",
+      halftime_shift: "46' Tactical shift",
+      sub_58: "58' Substitution",
+      goal_home_1: "63' Goal",
+      fatigue_71: "71' Pressing collapse",
+      goal_home_2: "84' Goal",
+    };
+
+    function buildMomentsSidebar() {
+      const sidebar = document.getElementById('moments-sidebar');
+      sidebar.innerHTML = MOMENT_ORDER.map(function(id) {
+        return '<li><button data-moment="' + id + '">' + MOMENT_LABELS[id] + '</button></li>';
+      }).join('');
+      sidebar.querySelectorAll('button').forEach(function(btn) {
+        btn.addEventListener('click', function() { selectMoment(btn.dataset.moment); });
+      });
+    }
+
+    const momentCache = {};
+
+    async function selectMoment(id) {
+      document.querySelectorAll('#moments-sidebar button').forEach(function(b) {
+        b.classList.toggle('active', b.dataset.moment === id);
+      });
+      const detail = document.getElementById('moment-detail');
+      detail.innerHTML = '<p>Loading…</p>';
+      if (!momentCache[id]) {
+        try {
+          const res = await fetch('/api/moment/' + id);
+          if (!res.ok) throw new Error('status ' + res.status);
+          momentCache[id] = await res.json();
+        } catch (err) {
+          detail.innerHTML = '<div class="error">Could not load this moment.</div>';
+          return;
+        }
+      }
+      renderMomentDetail(id, momentCache[id]);
+    }
+
+    function renderMomentDetail(id, moment) {
+      const detail = document.getElementById('moment-detail');
+      detail.innerHTML = renderTextMoment(moment);
+    }
+
+    function renderTextMoment(moment) {
+      let html = '<h2>' + moment.title + '</h2>';
+      if (moment.law) {
+        html += '<div class="law-badge">' + moment.law + '</div>';
+      }
+      html += '<p class="decision">' + moment.decision + '</p>';
+      html += '<p class="confidence-line">Confidence: ' + Math.round(moment.confidence * 100) + '%</p>';
+      html += '<p>' + moment.summary + '</p>';
+      html += '<h3>Evidence</h3><ul>' + moment.evidence.map(function(e) { return '<li>' + e + '</li>'; }).join('') + '</ul>';
+      if (moment.analytics) {
+        html += renderAnalyticsBlock(moment);
+      }
+      return html;
+    }
+
+    function renderAnalyticsBlock(moment) {
+      const a = moment.analytics;
+      if (a.handball_reaction) {
+        const r = a.handball_reaction.result;
+        const benchmark = a.handball_reaction.inputs.reaction_benchmark_ms;
+        return '<h3>Computed analytics</h3>' +
+          '<p>Ball reaches the point of contact in ' + r.time_available_ms + 'ms — ' +
+          r.deficit_ratio + 'x faster than the ' + benchmark + 'ms human reaction benchmark (' + r.verdict + ').</p>';
+      }
+      if (a.fatigue_index) {
+        const home = a.fatigue_index.home;
+        const away = a.fatigue_index.away;
+        const cmp = a.fatigue_comparison;
+        return '<h3>Computed analytics</h3>' +
+          '<table class="analytics-table">' +
+          '<tr><th>Team</th><th>Trend</th><th>Peak window</th></tr>' +
+          '<tr><td>' + matchData.home.name + '</td><td>' + home.trend + '</td><td>' + home.peak_window + '</td></tr>' +
+          '<tr><td>' + matchData.away.name + '</td><td>' + away.trend + '</td><td>' + away.peak_window + '</td></tr>' +
+          '</table>' +
+          '<p>More fatigued by full-time: ' + cmp.more_fatigued_team + ' (diff ' + cmp.difference[5] + ' pts)</p>';
+      }
+      return '';
     }
 
     document.getElementById('ask-form').addEventListener('submit', async (event) => {
