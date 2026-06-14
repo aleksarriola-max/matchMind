@@ -25,3 +25,9 @@ def test_offside_sensitivity_for_offside_27():
     for p in probabilities:
         assert 0.98 < p < 1.0
     assert probabilities == sorted(probabilities, reverse=True)
+
+
+def test_counterfactual_timing_for_offside_27():
+    result = analytics.counterfactual_timing(11, 7)
+    assert result["result"]["delay_needed_ms"] == pytest.approx(15.7, abs=0.05)
+    assert result["inputs"] == {"margin_cm": 11, "attacker_speed_ms": 7}

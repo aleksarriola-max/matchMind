@@ -47,3 +47,12 @@ def offside_sensitivity(margin_cm: float, camera_frame_uncertainty_cm: float) ->
         },
         "result": result,
     }
+
+
+def counterfactual_timing(margin_cm: float, attacker_speed_ms: float) -> dict:
+    delay_needed_ms = (margin_cm / 100) / attacker_speed_ms * 1000
+    return {
+        "formula": "delay_needed_ms = (margin_cm / 100) / attacker_speed_ms * 1000",
+        "inputs": {"margin_cm": margin_cm, "attacker_speed_ms": attacker_speed_ms},
+        "result": {"delay_needed_ms": round(delay_needed_ms, 1)},
+    }
