@@ -193,7 +193,7 @@ def fatigue_index(team_telemetry: dict) -> dict:
 def fatigue_comparison(home_telemetry: dict, away_telemetry: dict) -> dict:
     home_index = fatigue_index(home_telemetry)["result"]["fatigue_index"]
     away_index = fatigue_index(away_telemetry)["result"]["fatigue_index"]
-    difference = [round(away - home, 1) for home, away in zip(home_index, away_index)]
+    difference = [round(a - h, 1) for h, a in zip(home_index, away_index)]
     more_fatigued_team = "away" if difference[-1] >= 0 else "home"
     return {
         "formula": "difference[i] = away_fatigue_index[i] - home_fatigue_index[i]; more_fatigued_team based on sign of difference[-1]",
