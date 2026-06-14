@@ -96,6 +96,10 @@ def counterfactual_timing(margin_cm: float, attacker_speed_ms: float) -> dict:
 
 
 def handball_reaction(deflection_distance_m: float, ball_speed_ms: float, reaction_benchmark_ms: float = 250) -> dict:
+    if deflection_distance_m <= 0:
+        raise ValueError(f"deflection_distance_m must be positive, got {deflection_distance_m}")
+    if ball_speed_ms <= 0:
+        raise ValueError(f"ball_speed_ms must be positive, got {ball_speed_ms}")
     time_available_ms = deflection_distance_m / ball_speed_ms * 1000
     deficit_ratio = reaction_benchmark_ms / time_available_ms
     return {
@@ -108,6 +112,11 @@ def handball_reaction(deflection_distance_m: float, ball_speed_ms: float, reacti
         "result": {
             "time_available_ms": round(time_available_ms, 1),
             "deficit_ratio": round(deficit_ratio, 2),
+            "verdict": "exceeds human reaction limits" if deficit_ratio > 1 else "within human reaction limits",
+            "benchmark_sensitivity": [
+                {"reaction_benchmark_ms": b, "deficit_ratio": round(b / time_available_ms, 2)}
+                for b in [150, 200, 250, 300]
+            ],
         },
     }
 

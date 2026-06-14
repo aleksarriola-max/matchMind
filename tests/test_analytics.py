@@ -62,6 +62,21 @@ def test_handball_reaction_for_handball_38():
     }
 
 
+def test_handball_reaction_verdict_and_sensitivity_for_handball_38():
+    result = analytics.handball_reaction(1.06, 20)
+    assert result["result"]["verdict"] == "exceeds human reaction limits"
+    sensitivity = result["result"]["benchmark_sensitivity"]
+    assert [s["reaction_benchmark_ms"] for s in sensitivity] == [150, 200, 250, 300]
+    assert [s["deficit_ratio"] for s in sensitivity] == pytest.approx([2.83, 3.77, 4.72, 5.66], abs=0.01)
+
+
+def test_handball_reaction_rejects_non_positive_inputs():
+    with pytest.raises(ValueError):
+        analytics.handball_reaction(0, 20)
+    with pytest.raises(ValueError):
+        analytics.handball_reaction(1.06, 0)
+
+
 def test_fatigue_index_away_team():
     telemetry = analytics.TELEMETRY_DATA["teams"]["away"]
     result = analytics.fatigue_index(telemetry)
