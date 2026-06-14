@@ -32,14 +32,17 @@ def test_offside_probability_rejects_negative_frame_uncertainty():
 
 def test_offside_sensitivity_for_offside_27():
     result = analytics.offside_sensitivity(11, 6)
-    points = result["result"]
-    assert len(points) == 6
-    sigma_values = [p["sigma_line_cm"] for p in points]
+    sweep = result["result"]["sweep"]
+    assert len(sweep) == 6
+    sigma_values = [p["sigma_line_cm"] for p in sweep]
     assert sigma_values == [1.5, 2.0, 2.5, 3.0, 3.5, 4.0]
-    probabilities = [p["probability"] for p in points]
+    probabilities = [p["probability"] for p in sweep]
     for p in probabilities:
         assert 0.98 < p < 1.0
     assert probabilities == sorted(probabilities, reverse=True)
+    assert result["result"]["min_probability"] == pytest.approx(0.986, abs=0.001)
+    assert result["result"]["max_probability"] == pytest.approx(0.999, abs=0.001)
+    assert result["result"]["robust"] is True
 
 
 def test_counterfactual_timing_for_offside_27():

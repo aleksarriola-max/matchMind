@@ -54,10 +54,15 @@ def offside_probability(margin_cm: float, camera_frame_uncertainty_cm: float, si
 
 def offside_sensitivity(margin_cm: float, camera_frame_uncertainty_cm: float) -> dict:
     sigma_line_values = [1.5, 2.0, 2.5, 3.0, 3.5, 4.0]
-    result = []
+    sweep = []
     for sigma_line_cm in sigma_line_values:
         probability = offside_probability(margin_cm, camera_frame_uncertainty_cm, sigma_line_cm)["result"]["probability"]
-        result.append({"sigma_line_cm": sigma_line_cm, "probability": probability})
+        sweep.append({"sigma_line_cm": sigma_line_cm, "probability": probability})
+
+    probabilities = [p["probability"] for p in sweep]
+    min_probability = min(probabilities)
+    max_probability = max(probabilities)
+
     return {
         "formula": "Sweep sigma_line_cm over [1.5, 4.0] step 0.5, recomputing P(offside) for each value",
         "inputs": {
@@ -65,7 +70,12 @@ def offside_sensitivity(margin_cm: float, camera_frame_uncertainty_cm: float) ->
             "camera_frame_uncertainty_cm": camera_frame_uncertainty_cm,
             "sigma_line_cm_range": [1.5, 4.0],
         },
-        "result": result,
+        "result": {
+            "sweep": sweep,
+            "min_probability": round(min_probability, 3),
+            "max_probability": round(max_probability, 3),
+            "robust": min_probability >= 0.95,
+        },
     }
 
 
