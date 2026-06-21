@@ -420,20 +420,31 @@ not a nice-to-have.
 
 ## Evaluation results (last run)
 
+75-question golden harness (`evals/golden_questions.json`, 56 per-moment +
+9 knowledge-only + 10 off-topic questions):
+
 | Metric | Score |
 |--------|-------|
 | Routing accuracy | 100% |
-| Retrieval precision | 100% |
-| MRR | 0.84 |
+| Retrieval precision@1 | 100% |
+| MRR | 1.0 |
 | Verification pass rate | 100% |
-| Answer coverage | 0.92 |
+| Mean coverage | 1.0 |
 | Momentum sanity checks | 3/3 |
-| Red-team: numeric corruption caught | 4/4 |
-| Red-team: fabrication caught | 4/4 |
-| Red-team: entity-swap (lexical blind spot) | documented |
-| Red-team: negation (lexical blind spot) | documented |
+
+Red-team (`evals/verifier_redteam.py`), each attack run against both
+verifier modes:
+
+| Attack | demo (lexical) | ollama (granite entailment) |
+|--------|----------------|------------------------------|
+| Numeric corruption | caught | caught |
+| Fabrication | caught | caught |
+| Entity-swap | missed (documented blind spot) | caught |
+| Negation | missed (documented blind spot) | caught |
 
 Run: `python -m evals.run_evals` and `python -m evals.verifier_redteam`
+(the `ollama` column requires a local Ollama server running
+`granite3.3:8b` — see `OLLAMA_URL`/`OLLAMA_MODEL` below).
 
 ---
 

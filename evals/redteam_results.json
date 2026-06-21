@@ -1,0 +1,14 @@
+{
+  "demo": {
+    "numeric_corruption": "caught",
+    "fabrication": "caught",
+    "entity_swap": "missed",
+    "negation": "missed"
+  },
+  "ollama": {
+    "numeric_corruption": "caught",
+    "fabrication": "caught",
+    "entity_swap": "caught",
+    "negation": "caught"
+  }
+}
