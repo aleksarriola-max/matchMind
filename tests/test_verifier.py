@@ -1,3 +1,8 @@
+import importlib
+import json
+
+import pytest
+
 from backend.engines.verifier import verify
 
 EVIDENCE = [
@@ -47,3 +52,46 @@ def test_empty_answer_is_trivially_verified():
     assert result["checked_sentences"] == 0
     assert result["coverage"] == 1.0
     assert result["verified"] is True
+
+
+@pytest.fixture(autouse=True)
+def _restore_adapter_demo_mode():
+    yield
+    from backend.llm import adapter
+    importlib.reload(adapter)
+
+
+def _use_ollama_provider(monkeypatch):
+    monkeypatch.setenv("MATCHMIND_LLM_PROVIDER", "ollama")
+    from backend.llm import adapter
+    return importlib.reload(adapter)
+
+
+def test_granite_entailment_success(monkeypatch):
+    adapter = _use_ollama_provider(monkeypatch)
+    grounded = EVIDENCE[1]
+    unrelated = "The stadium concession stands sell delicious tacos and lemonade."
+    answer = f"{grounded} {unrelated}"
+    monkeypatch.setattr(adapter, "generate", lambda system, prompt, max_tokens=700: json.dumps([unrelated]))
+
+    result = verify(answer, EVIDENCE)
+    assert result["method"] == "granite"
+    assert result["verified"] is False
+    assert result["unsupported"] == [unrelated]
+    assert result["checked_sentences"] == 2
+    assert result["coverage"] == 0.5
+
+
+def test_granite_entailment_falls_back_on_failure(monkeypatch):
+    adapter = _use_ollama_provider(monkeypatch)
+    answer = EVIDENCE[1]
+
+    def _raise(*args, **kwargs):
+        raise RuntimeError("ollama unreachable")
+
+    monkeypatch.setattr(adapter, "generate", _raise)
+
+    result = verify(answer, EVIDENCE)
+    assert result["method"] == "lexical"
+    assert result["verified"] is True
+    assert result["coverage"] == 1.0

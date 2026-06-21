@@ -1,5 +1,6 @@
 import importlib
 
+import httpx
 import pytest
 
 
@@ -41,7 +42,43 @@ def test_watsonx_not_implemented(monkeypatch):
         adapter.generate("system prompt", "user prompt")
 
 
-def test_ollama_not_implemented(monkeypatch):
+class _FakeResponse:
+    def __init__(self, json_data, status_code=200):
+        self._json_data = json_data
+        self.status_code = status_code
+
+    def raise_for_status(self):
+        if self.status_code >= 400:
+            raise httpx.HTTPStatusError("error", request=None, response=self)
+
+    def json(self):
+        return self._json_data
+
+
+def test_health_info_ollama(monkeypatch):
     adapter = _reload_adapter(monkeypatch, provider="ollama")
-    with pytest.raises(NotImplementedError):
+    info = adapter.health_info()
+    assert info == {"provider": "ollama", "model": "granite3.3:8b"}
+
+
+def test_ollama_generate_success(monkeypatch):
+    adapter = _reload_adapter(monkeypatch, provider="ollama")
+
+    def fake_post(url, json, timeout):
+        assert url == "http://localhost:11434/api/chat"
+        assert json["model"] == "granite3.3:8b"
+        assert json["messages"] == [
+            {"role": "system", "content": "system prompt"},
+            {"role": "user", "content": "user prompt"},
+        ]
+        return _FakeResponse({"message": {"content": "fake answer"}})
+
+    monkeypatch.setattr(httpx, "post", fake_post)
+    assert adapter.generate("system prompt", "user prompt") == "fake answer"
+
+
+def test_ollama_generate_propagates_http_error(monkeypatch):
+    adapter = _reload_adapter(monkeypatch, provider="ollama")
+    monkeypatch.setattr(httpx, "post", lambda *a, **k: _FakeResponse({}, status_code=500))
+    with pytest.raises(httpx.HTTPStatusError):
         adapter.generate("system prompt", "user prompt")
