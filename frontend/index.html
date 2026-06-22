@@ -191,6 +191,10 @@
       padding: 6px 12px; font-weight: 700; font-size: 0.8em; cursor: pointer; flex-shrink: 0;
     }
     .replay-ticker-label { color: var(--muted); font-size: 0.75em; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+    .speak-btn {
+      background: none; border: 1px solid var(--border); border-radius: 4px; color: var(--accent);
+      cursor: pointer; padding: 2px 8px; margin-left: 8px; font-size: 0.9em;
+    }
   </style>
 </head>
 <body>
@@ -283,6 +287,7 @@
         <button data-speed="2" class="speed-btn">2x</button>
         <button data-speed="4" class="speed-btn">4x</button>
         <input type="range" id="replay-seek" min="0" max="90" value="0">
+        <button id="replay-mute">🔊</button>
       </div>
       <div id="replay-banner"></div>
       <div class="momentum-chart-wrap" id="replay-momentum-chart"></div>
@@ -309,6 +314,44 @@
         requestAnimationFrame(function() {
           requestAnimationFrame(function() { el.style.width = pct + '%'; });
         });
+      });
+    }
+
+    let speakingButton = null;
+
+    function speakText(text, button) {
+      if (!('speechSynthesis' in window)) return;
+      if (button && button === speakingButton) {
+        window.speechSynthesis.cancel();
+        return;
+      }
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.onstart = function() { setSpeakingButton(button); };
+      utterance.onend = function() { setSpeakingButton(null); };
+      utterance.onerror = function() { setSpeakingButton(null); };
+      speakingButton = button || null;
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function setSpeakingButton(button) {
+      document.querySelectorAll('.speak-btn').forEach(function(b) { b.textContent = '🔊'; });
+      speakingButton = button;
+      if (button) button.textContent = '⏹';
+    }
+
+    function escapeAttr(text) {
+      return text.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+    }
+
+    function speakButtonHtml(text) {
+      if (!('speechSynthesis' in window)) return '';
+      return '<button class="speak-btn" data-text="' + escapeAttr(text) + '">🔊</button>';
+    }
+
+    function wireSpeakButtons(container) {
+      container.querySelectorAll('.speak-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() { speakText(btn.dataset.text, btn); });
       });
     }
 
@@ -504,8 +547,10 @@
       }
 
       html += data.historical_incidents.map(function(incident) {
+        const narration = incident.title + '. ' + incident.description + ' ' + incident.decision +
+          (incident.comparison_to_today ? ' ' + incident.comparison_to_today : '');
         let card = '<div class="incident-card card-hover">' +
-          '<h4>' + incident.title + ' (' + incident.year + ')</h4>' +
+          '<h4>' + incident.title + ' (' + incident.year + ')' + speakButtonHtml(narration) + '</h4>' +
           '<div class="incident-meta">' + incident.match + '</div>' +
           '<p>' + incident.description + '</p>' +
           '<p><strong>Decision:</strong> ' + incident.decision + '</p>';
@@ -518,6 +563,7 @@
 
       result.innerHTML = html;
       animateGlowBars(result);
+      wireSpeakButtons(result);
     }
 
     const MOMENT_ORDER = ['offside_27', 'handball_38', 'halftime_shift', 'sub_58', 'goal_home_1', 'fatigue_71', 'goal_home_2'];
@@ -572,6 +618,7 @@
         detail.innerHTML = renderTextMoment(moment);
       }
       animateGlowBars(detail);
+      wireSpeakButtons(detail);
     }
 
     function renderTextMoment(moment) {
@@ -579,7 +626,7 @@
       if (moment.law) {
         html += '<div class="law-badge">' + moment.law + '</div>';
       }
-      html += '<p class="decision">' + moment.decision + '</p>';
+      html += '<p class="decision">' + moment.decision + speakButtonHtml(moment.decision + '. ' + moment.summary) + '</p>';
       html += renderGlowBar('Confidence', moment.confidence, 'var(--accent)');
       html += '<p>' + moment.summary + '</p>';
       html += '<h3>Evidence</h3><ul>' + moment.evidence.map(function(e) { return '<li>' + e + '</li>'; }).join('') + '</ul>';
@@ -642,7 +689,7 @@
       if (moment.law) {
         html += '<div class="law-badge">' + moment.law + '</div>';
       }
-      html += '<p class="decision">' + moment.decision + '</p>';
+      html += '<p class="decision">' + moment.decision + speakButtonHtml(moment.decision + '. ' + moment.summary) + '</p>';
 
       html += '<div class="lab-banner">' +
         '<div class="crest" style="background:' + homeColor + '">' + matchData.home.name[0] + '</div>' +
@@ -783,7 +830,7 @@
       const ex = data.explainability;
       const v = data.verification;
 
-      let html = '<h2>' + data.answer + '</h2>';
+      let html = '<h2>' + data.answer + speakButtonHtml(data.answer) + '</h2>';
 
       if (v.verified) {
         html += '<span class="badge verified">Verified</span> ';
@@ -823,6 +870,7 @@
 
       result.innerHTML = html;
       animateGlowBars(result);
+      wireSpeakButtons(result);
     });
 
     document.getElementById('outrage-form').addEventListener('submit', async (event) => {
@@ -846,7 +894,10 @@
         return;
       }
 
-      let html = '<h3>What actually happened</h3><p>' + data.summary + '</p>';
+      const narration = data.summary + (data.steelman
+        ? ' Your side: ' + data.steelman + ' The counter-case: ' + data.counter + ' ' + data.verdict
+        : '');
+      let html = '<h3>What actually happened' + speakButtonHtml(narration) + '</h3><p>' + data.summary + '</p>';
 
       if (data.steelman) {
         html += '<div class="debate-cols">' +
@@ -869,6 +920,7 @@
 
       result.innerHTML = html;
       animateGlowBars(result);
+      wireSpeakButtons(result);
     });
 
     let replayMinute = 0;
@@ -877,6 +929,7 @@
     let replayIntervalId = null;
     let replayLastTriggeredEventId = null;
     let replayBannerEventId = null;
+    let replayNarrationEnabled = true;
 
     function initLiveReplay() {
       document.getElementById('replay-play-pause').addEventListener('click', toggleReplayPlayback);
@@ -897,6 +950,10 @@
         replayBannerEventId = null;
         document.getElementById('replay-banner').innerHTML = '';
         renderReplayState();
+      });
+      document.getElementById('replay-mute').addEventListener('click', function() {
+        replayNarrationEnabled = !replayNarrationEnabled;
+        this.textContent = replayNarrationEnabled ? '🔊' : '🔇';
       });
       renderReplayState();
     }
@@ -993,6 +1050,10 @@
         '<div class="title">' + candidate.desc + '</div></div>' +
         '<button onclick="viewMomentFromReplay(\'' + candidate.id + '\')">View full explanation →</button>' +
         '</div>';
+
+      if (replayNarrationEnabled) {
+        speakText(candidate.desc);
+      }
 
       setTimeout(function() {
         if (replayBannerEventId === candidate.id) {
