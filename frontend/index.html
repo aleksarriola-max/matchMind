@@ -54,6 +54,10 @@
     .glow-bar-label { display: flex; justify-content: space-between; color: var(--muted); font-size: 0.75em; margin-bottom: 4px; }
     .glow-bar { background: #1c1c24; border-radius: 6px; height: 10px; overflow: hidden; }
     .glow-bar .fill { height: 100%; border-radius: 6px; width: 0; transition: width 0.6s ease-out; box-shadow: 0 0 10px currentColor; }
+    .momentum-chart-wrap { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 12px 16px; margin-bottom: 20px; }
+    .momentum-chart-wrap h3 { margin: 0 0 8px; font-size: 0.85em; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .momentum-chart-svg { width: 100%; display: block; }
+    .momentum-chart-svg .axis-label { fill: var(--muted); font-size: 9px; font-family: -apple-system, "Segoe UI", Roboto, sans-serif; }
     .team-cards { display: flex; gap: 16px; margin-bottom: 20px; }
     .team-card { flex: 1; background: var(--panel); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 6px; padding: 12px 16px; }
     .team-card .swatch {
@@ -151,6 +155,7 @@
   <main>
     <section id="tab-overview" class="tab-panel active">
       <div class="team-cards" id="team-cards"></div>
+      <div class="momentum-chart-wrap" id="momentum-chart"></div>
       <h2>Match events</h2>
       <ul class="event-list" id="overview-events"></ul>
     </section>
@@ -279,6 +284,71 @@
           '<span class="event-badge">' + e.type + '</span>' +
           '<span>' + e.desc + '</span></li>';
       }).join('');
+
+      renderMomentumChart();
+    }
+
+    function renderMomentumChart() {
+      const container = document.getElementById('momentum-chart');
+      const curve = matchData.momentum;
+      const maxAbs = Math.max(1, Math.max.apply(null, curve.map(function(p) { return Math.abs(p.value); })));
+      const width = 380, height = 130, marginX = 10, baselineY = 65, halfHeight = 50;
+
+      function xPos(minute) { return marginX + (minute / 90) * (width - 2 * marginX); }
+      function yPos(value) { return baselineY - (value / maxAbs) * halfHeight; }
+
+      function nearestValue(minute) {
+        let best = curve[0];
+        curve.forEach(function(p) {
+          if (Math.abs(p.minute - minute) < Math.abs(best.minute - minute)) best = p;
+        });
+        return best.value;
+      }
+
+      function pointTitle(minute, value) {
+        const team = value > 0 ? matchData.home.name : value < 0 ? matchData.away.name : 'Even';
+        return minute + '\' — ' + (value === 0 ? 'Even' : team + ' ahead (' + value.toFixed(1) + ')');
+      }
+
+      const points = curve.map(function(p) { return xPos(p.minute) + ',' + yPos(p.value); }).join(' ');
+
+      const goalMarkers = matchData.events.filter(function(e) { return e.type === 'goal'; }).map(function(e) {
+        const value = nearestValue(e.minute);
+        return '<circle cx="' + xPos(e.minute) + '" cy="' + yPos(value) + '" r="3.5" fill="#fff" stroke="#000" stroke-width="0.5"><title>' + pointTitle(e.minute, value) + '</title></circle>';
+      }).join('');
+
+      const hoverPoints = curve.map(function(p) {
+        return '<circle cx="' + xPos(p.minute) + '" cy="' + yPos(p.value) + '" r="8" fill="transparent"><title>' + pointTitle(p.minute, p.value) + '</title></circle>';
+      }).join('');
+
+      container.innerHTML = '<h3>Momentum</h3>' +
+        '<svg viewBox="0 0 ' + width + ' ' + height + '" class="momentum-chart-svg">' +
+        '<defs><linearGradient id="momentum-gradient" x1="0" y1="0" x2="1" y2="0">' +
+        '<stop offset="0%" stop-color="' + matchData.home.color + '"/>' +
+        '<stop offset="100%" stop-color="' + matchData.away.color + '"/>' +
+        '</linearGradient></defs>' +
+        '<line x1="' + marginX + '" y1="' + baselineY + '" x2="' + (width - marginX) + '" y2="' + baselineY + '" stroke="#333" stroke-width="1" stroke-dasharray="3,3"/>' +
+        '<polyline points="' + points + '" fill="none" stroke="url(#momentum-gradient)" stroke-width="2.5" id="momentum-path" style="filter:drop-shadow(0 0 4px rgba(0,224,255,0.4))"/>' +
+        goalMarkers + hoverPoints +
+        '<text x="' + marginX + '" y="' + (height - 4) + '" class="axis-label">0\'</text>' +
+        '<text x="' + (width - marginX) + '" y="' + (height - 4) + '" class="axis-label" text-anchor="end">90\'</text>' +
+        '</svg>';
+
+      animateMomentumPath();
+    }
+
+    function animateMomentumPath() {
+      const path = document.getElementById('momentum-path');
+      if (!path) return;
+      const length = path.getTotalLength();
+      path.style.strokeDasharray = length;
+      path.style.strokeDashoffset = length;
+      requestAnimationFrame(function() {
+        requestAnimationFrame(function() {
+          path.style.transition = 'stroke-dashoffset 0.8s ease-out';
+          path.style.strokeDashoffset = '0';
+        });
+      });
     }
 
     let momentsInitialized = false;
