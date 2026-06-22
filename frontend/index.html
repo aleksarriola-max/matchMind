@@ -99,8 +99,38 @@
     .analytics-table th, .analytics-table td {
       border: 1px solid var(--border); padding: 6px 12px; text-align: left;
     }
-    .pitch-wrap { background: #0b0b0b; border: 1px solid var(--border); border-radius: 6px; padding: 10px; margin-top: 12px; }
-    .pitch-svg { width: 100%; display: block; }
+    .pitch-wrap {
+      background: radial-gradient(ellipse at center, #15351f 0%, #0a0a0a 80%);
+      border: 1px solid var(--border); border-radius: 6px; padding: 10px; margin-top: 12px;
+      position: relative; overflow: hidden;
+    }
+    .pitch-wrap::before, .pitch-wrap::after {
+      content: ''; position: absolute; top: 0; width: 70px; height: 30px;
+      background: radial-gradient(ellipse, rgba(255,255,255,0.18), transparent 70%);
+      pointer-events: none;
+    }
+    .pitch-wrap::before { left: 0; }
+    .pitch-wrap::after { right: 0; }
+    .pitch-svg { width: 100%; display: block; position: relative; z-index: 1; }
+    .crowd-row {
+      height: 8px; background-image: radial-gradient(circle, rgba(200,200,200,0.4) 1px, transparent 1.5px);
+      background-size: 6px 6px; opacity: 0.5; position: relative; z-index: 1;
+    }
+    .lab-banner { display: flex; align-items: center; justify-content: center; gap: 14px; margin: 10px 0; }
+    .crest {
+      width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center;
+      justify-content: center; color: #fff; font-weight: 800; font-size: 13px; border: 2px solid #fff;
+      flex-shrink: 0;
+    }
+    .lab-banner .var-label {
+      display: flex; align-items: center; gap: 6px; color: #ddd; font-size: 0.75em;
+      letter-spacing: 1px; text-transform: uppercase; font-weight: 700;
+    }
+    .pulse-dot {
+      width: 7px; height: 7px; border-radius: 50%; background: #ff3b3b;
+      box-shadow: 0 0 6px #ff3b3b; animation: pulse 1.4s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
     .lower-third {
       display: flex; justify-content: space-between; align-items: center;
       background: linear-gradient(90deg, var(--accent), var(--home));
@@ -555,7 +585,13 @@
       }
       html += '<p class="decision">' + moment.decision + '</p>';
 
-      html += '<div class="pitch-wrap"><svg viewBox="-2 -2 104 72" class="pitch-svg">';
+      html += '<div class="lab-banner">' +
+        '<div class="crest" style="background:' + homeColor + '">' + matchData.home.name[0] + '</div>' +
+        '<span class="var-label"><span class="pulse-dot"></span>VAR Review</span>' +
+        '<div class="crest" style="background:' + awayColor + '">' + matchData.away.name[0] + '</div>' +
+        '</div>';
+
+      html += '<div class="pitch-wrap"><div class="crowd-row"></div><svg viewBox="-2 -2 104 72" class="pitch-svg">';
 
       html += '<rect x="-2" y="-2" width="104" height="72" fill="#1a6e38"/>';
       html += '<g opacity="0.18" fill="#ffffff">';
@@ -606,7 +642,7 @@
       html += '<circle cx="' + p.assistant_referee.x + '" cy="' + (p.assistant_referee.y + 0.3) + '" r="1" fill="#ffe14d"/>';
       html += '<text x="' + p.assistant_referee.x + '" y="' + (p.assistant_referee.y - 0.6) + '" fill="#ffe14d" font-size="2" text-anchor="middle">' + p.assistant_referee.label + '</text>';
 
-      html += '</svg></div>';
+      html += '</svg><div class="crowd-row"></div></div>';
 
       const probability = moment.analytics.offside_probability.result.probability;
       html += '<div class="lower-third">' +
