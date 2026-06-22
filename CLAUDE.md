@@ -100,9 +100,12 @@ backend/
     historical_incidents.json   Real World Cup incidents 1986-2022 (6 incidents)
     telemetry.json              Per-15min windowed physical/positional data (both teams)
     knowledge/
-      laws_and_tactics.md       Retrieval knowledge pack — 17 ## sections covering
+      laws_and_tactics.md       Retrieval knowledge pack — 9 ## sections covering
                                 Law 11, Law 12, VAR protocol, SAOT, tactics, coaching,
                                 human performance
+      laws_of_the_game_excerpt.md  Docling-ingested sample (2 ## sections: Law 11,
+                                Law 12) — generated via `python -m backend.rag.ingest`,
+                                see docs/source_pdfs/laws_of_the_game_excerpt.pdf
 frontend/
   index.html                    Single-file UI — no build step
                                 Sections: timeline · Decision Lab · Ask MatchMind ·

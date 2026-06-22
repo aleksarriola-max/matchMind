@@ -3,7 +3,7 @@ from backend.rag.retriever import get_retriever
 
 def test_chunks_loaded_from_knowledge_pack():
     retriever = get_retriever()
-    assert len(retriever.chunks) == 9
+    assert len(retriever.chunks) == 11
     titles = {c["title"] for c in retriever.chunks}
     assert "Law 11 — Offside Offence" in titles
     assert "Law 12 — Handball" in titles

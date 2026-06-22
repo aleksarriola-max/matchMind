@@ -11,7 +11,7 @@
   {"category": "moment", "question": "Why didn't the referee award a penalty, citing no realistic time to react to the handball appeal?", "expected_moment_id": "handball_38", "expected_top_source": "Law 12 — Handball"},
   {"category": "moment", "question": "Explain why the 38th-minute deflection left the defender no realistic chance to avoid the handball contact.", "expected_moment_id": "handball_38", "expected_top_source": "Law 12 — Handball"},
   {"category": "moment", "question": "Why was no penalty given when the ball hit the defender's arm?", "expected_moment_id": "handball_38", "expected_top_source": "Law 12 — Handball"},
-  {"category": "moment", "question": "What's the reasoning behind not calling a handball in the box?", "expected_moment_id": "handball_38", "expected_top_source": "Law 12 — Handball"},
+  {"category": "moment", "question": "Why is there no handball call when a player has no realistic time to react to a deflection?", "expected_moment_id": "handball_38", "expected_top_source": "Law 12 — Handball"},
   {"category": "moment", "question": "Why did the referee treat the deflection's handball contact as accidental rather than deliberately moving the arm toward the ball?", "expected_moment_id": "handball_38", "expected_top_source": "Law 12 — Handball"},
   {"category": "moment", "question": "Can you break down the penalty appeal from the 38th minute?", "expected_moment_id": "handball_38", "expected_top_source": "Law 12 — Handball"},
   {"category": "moment", "question": "Why did the referee wave away the handball claim as having no time to react?", "expected_moment_id": "handball_38", "expected_top_source": "Law 12 — Handball"},
@@ -62,7 +62,7 @@
   {"category": "moment", "question": "What was the sequence after the corner was only partially cleared that produced the 84th-minute winning goal?", "expected_moment_id": "goal_home_2", "expected_top_source": "Set-Piece and Second-Phase Routines"},
   {"category": "moment", "question": "How did the rebound from the corner turn into the winner?", "expected_moment_id": "goal_home_2", "expected_top_source": "Set-Piece and Second-Phase Routines"},
 
-  {"category": "knowledge", "question": "What does the offside law actually say about being level with a defender?", "expected_moment_id": null, "expected_top_source": "Law 11 — Offside Offence"},
+  {"category": "knowledge", "question": "How does semi-automated offside technology construct the virtual offside line to judge a player level with the defender?", "expected_moment_id": null, "expected_top_source": "Law 11 — Offside Offence"},
   {"category": "knowledge", "question": "Under the handball law, when is contact with the arm not an offence?", "expected_moment_id": null, "expected_top_source": "Law 12 — Handball"},
   {"category": "knowledge", "question": "What kinds of decisions can the Video Assistant Referee review?", "expected_moment_id": null, "expected_top_source": "VAR Protocol"},
   {"category": "knowledge", "question": "What's the general difference between a 4-3-3 and a 4-4-2?", "expected_moment_id": null, "expected_top_source": "Formation Changes and Tactical Shifts"},

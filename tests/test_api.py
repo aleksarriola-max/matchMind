@@ -16,7 +16,7 @@ def test_root_serves_frontend():
 def test_health():
     response = client.get("/api/health")
     assert response.status_code == 200
-    assert response.json() == {"provider": "demo", "model": None, "chunk_count": 9}
+    assert response.json() == {"provider": "demo", "model": None, "chunk_count": 11}
 
 
 def test_match():
