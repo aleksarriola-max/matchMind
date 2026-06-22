@@ -332,19 +332,34 @@
 
     let speakingButton = null;
 
+    let currentUtterance = null;
+
     function speakText(text, button) {
       if (!('speechSynthesis' in window)) return;
       if (button && button === speakingButton) {
         window.speechSynthesis.cancel();
         return;
       }
-      window.speechSynthesis.cancel();
+      const wasSpeaking = window.speechSynthesis.speaking || window.speechSynthesis.pending;
+      if (wasSpeaking) {
+        window.speechSynthesis.cancel();
+      }
+
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.onstart = function() { setSpeakingButton(button); };
       utterance.onend = function() { setSpeakingButton(null); };
       utterance.onerror = function() { setSpeakingButton(null); };
+      currentUtterance = utterance;
       speakingButton = button || null;
-      window.speechSynthesis.speak(utterance);
+
+      // Speaking immediately after cancel() races with its internal teardown
+      // in Chrome and can silently drop the new utterance -- a short delay
+      // only when there was something to actually cancel avoids it.
+      if (wasSpeaking) {
+        setTimeout(function() { window.speechSynthesis.speak(utterance); }, 50);
+      } else {
+        window.speechSynthesis.speak(utterance);
+      }
     }
 
     function setSpeakingButton(button) {
