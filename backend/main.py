@@ -165,3 +165,28 @@ def ask(request: AskRequest):
         "explainability": explainability,
         "llm": adapter.health_info(),
     }
+
+
+class OutrageRequest(BaseModel):
+    take: str
+    language: str = "English"
+
+
+@app.post("/api/outrage")
+def outrage(request: OutrageRequest):
+    result = explainer.outrage(request.take)
+    verification = None
+    if result["counter"] is not None:
+        verification = verify(result["counter"], result["evidence"])
+    return {
+        "take": request.take,
+        "language": "English",
+        "moment_id": result["moment_id"],
+        "summary": result["summary"],
+        "steelman": result["steelman"],
+        "counter": result["counter"],
+        "verdict": result["verdict"],
+        "confidence": result["confidence"],
+        "verification": verification,
+        "lineage": result["lineage"],
+    }

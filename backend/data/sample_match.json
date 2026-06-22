@@ -79,7 +79,7 @@
       "counterfactual": "If the attacker had timed the run about 15.7 ms later, the 11 cm margin would have closed to zero and the goal would have stood.",
       "referee_view": "From the assistant referee's pitchside angle, a gap of roughly 11 cm between two players nearly 30 meters away is at the edge of unaided human perception, which is why the call was confirmed by semi-automated offside technology rather than the naked eye.",
       "debate": {
-        "stands": "The technology measured an 11 cm margin with 99.7% confidence, comfortably above the threshold for a clear and obvious VAR overturn under Law 11.",
+        "stands": "Under Law 11, semi-automated offside technology measured the attacker 11 cm beyond the second-last defender, and combining the camera and limb-line uncertainties gives roughly 99.7% confidence that the attacker was genuinely in an offside position.",
         "overturn": "Even a 99.7% confident measurement carries a small chance of error, and a margin smaller than the width of a boot stud arguably should not decide a goal at the highest level of the sport."
       }
     },

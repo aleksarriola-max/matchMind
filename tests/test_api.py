@@ -1,6 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
 
+from backend.engines import explainer
 from backend.main import app
 
 client = TestClient(app)
@@ -207,3 +208,62 @@ def test_moment_sub_58_has_null_analytics():
     response = client.get("/api/moment/sub_58")
     assert response.status_code == 200
     assert response.json()["analytics"] is None
+
+
+def test_outrage_offside_27_returns_debate():
+    take = "That offside call was robbery, the goal should have stood!"
+    response = client.post("/api/outrage", json={"take": take})
+    assert response.status_code == 200
+    data = response.json()
+    assert data["moment_id"] == "offside_27"
+    assert data["steelman"] == (
+        "Even a 99.7% confident measurement carries a small chance of error, and a "
+        "margin smaller than the width of a boot stud arguably should not decide a "
+        "goal at the highest level of the sport."
+    )
+    assert data["counter"] == (
+        "Under Law 11, semi-automated offside technology measured the attacker 11 cm "
+        "beyond the second-last defender, and combining the camera and limb-line "
+        "uncertainties gives roughly 99.7% confidence that the attacker was "
+        "genuinely in an offside position."
+    )
+    assert "99.7%" in data["verdict"]
+    assert data["verification"]["verified"] is True
+
+
+def test_outrage_handball_38_returns_debate():
+    take = "No way that handball deserved a penalty, total joke of a decision!"
+    response = client.post("/api/outrage", json={"take": take})
+    assert response.status_code == 200
+    data = response.json()
+    assert data["moment_id"] == "handball_38"
+    assert data["steelman"] is not None
+    assert data["counter"] is not None
+    assert "74.0%" in data["verdict"]
+    assert data["verification"]["verified"] is True
+
+
+def test_outrage_no_debate_moment_omits_steelman_and_counter():
+    take = "Switching to a 4-4-2 at halftime was a disaster tactically."
+    response = client.post("/api/outrage", json={"take": take})
+    assert response.status_code == 200
+    data = response.json()
+    assert data["moment_id"] == "halftime_shift"
+    assert data["steelman"] is None
+    assert data["counter"] is None
+    assert data["verdict"] is None
+    assert data["verification"] is None
+    assert data["summary"] == explainer.MATCH_DATA["moments"]["halftime_shift"]["summary"]
+
+
+def test_outrage_offtopic_take_has_no_moment():
+    take = "What is the weather like today?"
+    response = client.post("/api/outrage", json={"take": take})
+    assert response.status_code == 200
+    data = response.json()
+    assert data["moment_id"] is None
+    assert data["steelman"] is None
+    assert data["counter"] is None
+    assert data["verdict"] is None
+    assert data["verification"] is None
+    assert data["summary"]

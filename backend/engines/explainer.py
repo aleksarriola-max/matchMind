@@ -93,6 +93,59 @@ CONFIDENCE_NOTES = {
 }
 
 
+VERDICT_TEMPLATE = (
+    "Both sides raise fair points, but the grounded evidence gives {confidence:.1%} "
+    "confidence that the decision under {law} was correct: {decision}."
+)
+
+
+def outrage(take: str) -> dict:
+    moment_id = route(take)
+    moment = MATCH_DATA["moments"].get(moment_id) if moment_id else None
+
+    if moment is not None and moment["debate"] is not None:
+        steelman = moment["debate"]["overturn"]
+        counter = moment["debate"]["stands"]
+        verdict = VERDICT_TEMPLATE.format(
+            confidence=moment["confidence"], law=moment["law"], decision=moment["decision"]
+        )
+        return {
+            "moment_id": moment_id,
+            "summary": moment["summary"],
+            "steelman": steelman,
+            "counter": counter,
+            "verdict": verdict,
+            "confidence": moment["confidence"],
+            "evidence": moment["evidence"],
+            "lineage": f"take -> route[{moment_id}] -> debate[overturn/stands] -> verifier[lexical]",
+        }
+
+    if moment is not None:
+        return {
+            "moment_id": moment_id,
+            "summary": moment["summary"],
+            "steelman": None,
+            "counter": None,
+            "verdict": None,
+            "confidence": moment["confidence"],
+            "evidence": None,
+            "lineage": f"take -> route[{moment_id}] -> no debate -> verifier[none]",
+        }
+
+    retrieved = get_retriever().search(take, k=3)
+    summary = retrieved[0]["text"] if retrieved else "No grounded information is available for this take."
+    return {
+        "moment_id": None,
+        "summary": summary,
+        "steelman": None,
+        "counter": None,
+        "verdict": None,
+        "confidence": GENERAL_PRIOR_CONFIDENCE,
+        "evidence": None,
+        "lineage": f"take -> route[none] -> retrieve[{len(retrieved)} chunks] -> verifier[none]",
+    }
+
+
 def explain(moment_id: str | None, moment: dict | None, retrieved: list[dict], verification: dict) -> dict:
     decision_class = DECISION_CLASS.get(moment_id, "general")
     confidence = moment["confidence"] if moment is not None else GENERAL_PRIOR_CONFIDENCE

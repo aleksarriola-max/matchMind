@@ -115,6 +115,7 @@
     <button data-tab="overview" class="active">Overview</button>
     <button data-tab="moments">Moments</button>
     <button data-tab="ask">Ask MatchMind</button>
+    <button data-tab="outrage">Debate</button>
   </nav>
   <main>
     <section id="tab-overview" class="tab-panel active">
@@ -158,6 +159,19 @@
         <button type="submit">Ask</button>
       </form>
       <div id="result"></div>
+    </section>
+
+    <section id="tab-outrage" class="tab-panel">
+      <h2>Explain My Outrage</h2>
+      <form id="outrage-form">
+        <label>
+          Your take:
+          <textarea id="take" rows="3" cols="60">That offside call was robbery, the goal should have stood!</textarea>
+        </label>
+        <br>
+        <button type="submit">Explain my outrage</button>
+      </form>
+      <div id="outrage-result"></div>
     </section>
   </main>
 
@@ -513,6 +527,50 @@
       }
 
       html += '<p class="lineage">' + ex.lineage + '</p>';
+
+      result.innerHTML = html;
+    });
+
+    document.getElementById('outrage-form').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const take = document.getElementById('take').value;
+
+      const result = document.getElementById('outrage-result');
+      result.innerHTML = '<p>Loading…</p>';
+
+      let data;
+      try {
+        const response = await fetch('/api/outrage', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ take, language: 'English' }),
+        });
+        if (!response.ok) throw new Error('status ' + response.status);
+        data = await response.json();
+      } catch (err) {
+        result.innerHTML = '<div class="error">Could not get a response — is the backend running?</div>';
+        return;
+      }
+
+      let html = '<h3>What actually happened</h3><p>' + data.summary + '</p>';
+
+      if (data.steelman) {
+        html += '<div class="debate-cols">' +
+          '<div><h4>Your side</h4><p>' + data.steelman + '</p></div>' +
+          '<div><h4>The counter-case</h4>';
+        if (data.verification) {
+          html += data.verification.verified
+            ? '<span class="badge verified">Verified</span> '
+            : '<span class="badge unverified">Unverified</span> ';
+        }
+        html += '<p>' + data.counter + '</p></div>' +
+          '</div>';
+        html += '<div class="callout">' + data.verdict + '</div>';
+      } else {
+        html += '<div class="callout">This isn\'t a contested officiating call, so there\'s no counter-case here — just what happened.</div>';
+      }
+
+      html += '<p class="lineage">' + data.lineage + '</p>';
 
       result.innerHTML = html;
     });
