@@ -22,6 +22,14 @@
       background: var(--bg);
       color: var(--text);
     }
+    .bg-glow { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+    .bg-blob { position: absolute; width: 50vw; height: 50vw; max-width: 600px; max-height: 600px; border-radius: 50%; filter: blur(60px); opacity: 0.35; }
+    .bg-blob-gold { background: #ffd14d; top: -10%; left: -10%; animation: drift1 28s ease-in-out infinite; }
+    .bg-blob-cyan { background: #00e0ff; top: -15%; right: -10%; animation: drift2 34s ease-in-out infinite; }
+    .bg-blob-green { background: #2ecc71; bottom: -20%; left: 30%; animation: drift3 40s ease-in-out infinite; }
+    @keyframes drift1 { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(40px, 30px); } }
+    @keyframes drift2 { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(-30px, 40px); } }
+    @keyframes drift3 { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(30px, -30px); } }
     a { color: var(--accent); }
     header.match-header { padding: 16px 24px; border-bottom: 1px solid var(--border); }
     header.match-header .competition { color: var(--muted); font-size: 0.9em; margin: 0 0 4px; }
@@ -198,6 +206,11 @@
   </style>
 </head>
 <body>
+  <div class="bg-glow" aria-hidden="true">
+    <div class="bg-blob bg-blob-gold"></div>
+    <div class="bg-blob bg-blob-cyan"></div>
+    <div class="bg-blob bg-blob-green"></div>
+  </div>
   <header class="match-header" id="match-header">
     <p class="competition"></p>
     <h1></h1>
