@@ -1,0 +1,74 @@
+[
+  {
+    "id": "hand_of_god_1986",
+    "year": 1986,
+    "match": "Argentina vs England, World Cup quarterfinal",
+    "topic": "handball",
+    "title": "Maradona's \"Hand of God\"",
+    "description": "Diego Maradona punched the ball into the net with his hand during a quarterfinal against England.",
+    "decision": "Goal awarded — the referee and linesman did not see the handball and the goal stood.",
+    "technology_available": "None — no video assistant referee, no goal-line or handball review technology existed.",
+    "rule_at_time": "Law 12 handball decisions relied entirely on the on-field officials' live view.",
+    "judgment_correct": false
+  },
+  {
+    "id": "lampard_2010",
+    "year": 2010,
+    "match": "England vs Germany, World Cup round of 16",
+    "topic": "goal-line",
+    "title": "Lampard's disallowed goal",
+    "description": "Frank Lampard's shot struck the crossbar and clearly crossed the goal line before bouncing out, but the goal was not awarded.",
+    "decision": "No goal awarded — the referee and linesman missed the ball crossing the line in real time.",
+    "technology_available": "None — goal-line technology was not yet approved for use at the World Cup.",
+    "rule_at_time": "Goal-line decisions relied entirely on the on-field officials' live view, with no review mechanism.",
+    "judgment_correct": false
+  },
+  {
+    "id": "suarez_handball_2010",
+    "year": 2010,
+    "match": "Uruguay vs Ghana, World Cup quarterfinal",
+    "topic": "handball",
+    "title": "Suárez's goal-line handball",
+    "description": "Luis Suárez deliberately handled a goal-bound header on his own goal line in the final seconds of extra time.",
+    "decision": "Penalty awarded and Suárez sent off; Ghana missed the resulting penalty kick.",
+    "technology_available": "None for the handball review itself — the referee was positioned to see the incident live and ruled immediately under existing law without needing replay.",
+    "rule_at_time": "Law 12 allows a direct red card and penalty for denying an obvious goal by deliberate handball.",
+    "judgment_correct": true
+  },
+  {
+    "id": "var_penalty_2018",
+    "year": 2018,
+    "match": "France vs Australia, World Cup group stage",
+    "topic": "penalty",
+    "title": "First VAR-awarded penalty in World Cup history",
+    "description": "Antoine Griezmann went down under a challenge in the box; the on-field referee initially waved play on.",
+    "decision": "Penalty awarded after a pitchside VAR review reversed the no-call.",
+    "technology_available": "Video Assistant Referee (VAR) pitchside monitor review, used for the first time at a World Cup.",
+    "rule_at_time": "VAR protocol allowed review of penalty decisions for clear and obvious errors.",
+    "judgment_correct": true
+  },
+  {
+    "id": "argentina_saudi_offside_2022",
+    "year": 2022,
+    "match": "Argentina vs Saudi Arabia, World Cup group stage",
+    "topic": "offside",
+    "title": "Three offside goals disallowed in one half",
+    "description": "Argentina had three goals ruled out for offside in the first half, each by very tight margins.",
+    "decision": "All three goals disallowed after VAR review using semi-automated offside technology.",
+    "technology_available": "Semi-automated offside technology with limb-tracking cameras, used for the first time at a World Cup.",
+    "rule_at_time": "Law 11 offside, measured to centimeter-level precision rather than relying on a linesman's flag.",
+    "judgment_correct": true
+  },
+  {
+    "id": "japan_spain_goal_line_2022",
+    "year": 2022,
+    "match": "Japan vs Spain, World Cup group stage",
+    "topic": "goal-line",
+    "title": "Japan's 1.88 mm goal-line call",
+    "description": "Before Japan's second goal, the ball appeared to cross the byline for a goal kick before being cut back into play.",
+    "decision": "Goal awarded after VAR used multi-angle ball-tracking to determine the ball retained 1.88 mm of contact with the line.",
+    "technology_available": "Multi-camera ball-tracking review, used to make a sub-centimeter determination invisible to the naked eye.",
+    "rule_at_time": "A ball is out of play only once it has wholly crossed the line; technology allowed a precision check standard officiating could not.",
+    "judgment_correct": true
+  }
+]

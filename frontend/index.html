@@ -104,6 +104,12 @@
     .confidence-card { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 12px 16px; margin: 12px 0; }
     .confidence-card .confidence-line { font-size: 1.4em; margin: 0 0 4px; }
     .lineage { font-family: monospace; color: var(--muted); font-size: 0.8em; margin-top: 16px; }
+    .history-topics { display: flex; gap: 8px; margin: 12px 0; }
+    .history-topics button { text-transform: capitalize; }
+    .history-topics button.active { border-color: var(--accent); color: var(--accent); }
+    .incident-card { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 12px 16px; margin: 12px 0; }
+    .incident-card h4 { margin: 0 0 4px; }
+    .incident-card .incident-meta { color: var(--muted); font-size: 0.85em; margin-bottom: 8px; }
   </style>
 </head>
 <body>
@@ -116,6 +122,7 @@
     <button data-tab="moments">Moments</button>
     <button data-tab="ask">Ask MatchMind</button>
     <button data-tab="outrage">Debate</button>
+    <button data-tab="history">History</button>
   </nav>
   <main>
     <section id="tab-overview" class="tab-panel active">
@@ -172,6 +179,13 @@
         <button type="submit">Explain my outrage</button>
       </form>
       <div id="outrage-result"></div>
+    </section>
+
+    <section id="tab-history" class="tab-panel">
+      <h2>Decision Consistency Analyzer</h2>
+      <p>Compare today's call with real World Cup history.</p>
+      <div class="history-topics" id="history-topics"></div>
+      <div id="history-result"></div>
     </section>
   </main>
 
@@ -234,8 +248,70 @@
             momentsInitialized = true;
             selectMoment('offside_27');
           }
+          if (btn.dataset.tab === 'history' && !historyInitialized) {
+            historyInitialized = true;
+            initHistoryTab();
+          }
         });
       });
+    }
+
+    let historyInitialized = false;
+
+    function initHistoryTab() {
+      const topics = ['offside', 'handball', 'goal-line', 'penalty'];
+      const container = document.getElementById('history-topics');
+      container.innerHTML = topics.map(function(t) {
+        return '<button data-topic="' + t + '">' + t + '</button>';
+      }).join('');
+      container.querySelectorAll('button').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          container.querySelectorAll('button').forEach(function(b) { b.classList.remove('active'); });
+          btn.classList.add('active');
+          selectHistoryTopic(btn.dataset.topic);
+        });
+      });
+      container.querySelector('button').classList.add('active');
+      selectHistoryTopic(topics[0]);
+    }
+
+    async function selectHistoryTopic(topic) {
+      const result = document.getElementById('history-result');
+      result.innerHTML = '<p>Loading…</p>';
+      let data;
+      try {
+        const res = await fetch('/api/consistency/' + topic);
+        if (!res.ok) throw new Error('status ' + res.status);
+        data = await res.json();
+      } catch (err) {
+        result.innerHTML = '<div class="error">Could not load this topic.</div>';
+        return;
+      }
+
+      let html = '';
+      if (data.today) {
+        html += '<div class="confidence-card">' +
+          '<div class="confidence-line">' + (data.today.confidence * 100).toFixed(1) + '%</div>' +
+          '<div>Today\'s call: ' + data.today.decision + '</div>' +
+          '</div>';
+      } else {
+        html += '<p>This match has no ' + topic + ' review to compare against — here\'s the history.</p>';
+      }
+
+      html += data.historical_incidents.map(function(incident) {
+        let card = '<div class="incident-card">' +
+          '<h4>' + incident.title + ' (' + incident.year + ')</h4>' +
+          '<div class="incident-meta">' + incident.match + '</div>' +
+          '<p>' + incident.description + '</p>' +
+          '<p><strong>Decision:</strong> ' + incident.decision + '</p>';
+        if (incident.comparison_to_today) {
+          card += '<div class="callout">' + incident.comparison_to_today + '</div>';
+        }
+        card += '</div>';
+        return card;
+      }).join('');
+
+      result.innerHTML = html;
     }
 
     const MOMENT_ORDER = ['offside_27', 'handball_38', 'halftime_shift', 'sub_58', 'goal_home_1', 'fatigue_71', 'goal_home_2'];

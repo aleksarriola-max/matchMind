@@ -4,7 +4,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, field_validator
 
-from backend.engines import analytics, explainer
+from backend.engines import analytics, consistency, explainer
 from backend.engines.verifier import verify
 from backend.llm import adapter
 from backend.rag.retriever import get_retriever
@@ -190,3 +190,15 @@ def outrage(request: OutrageRequest):
         "verification": verification,
         "lineage": result["lineage"],
     }
+
+
+@app.get("/api/consistency")
+def consistency_topics():
+    return {"topics": consistency.list_topics()}
+
+
+@app.get("/api/consistency/{topic}")
+def consistency_compare(topic: str):
+    if topic not in consistency.VALID_TOPICS:
+        raise HTTPException(status_code=404, detail=f"Unknown topic: {topic!r}")
+    return consistency.compare(topic)

@@ -256,6 +256,26 @@ def test_outrage_no_debate_moment_omits_steelman_and_counter():
     assert data["summary"] == explainer.MATCH_DATA["moments"]["halftime_shift"]["summary"]
 
 
+def test_consistency_topics():
+    response = client.get("/api/consistency")
+    assert response.status_code == 200
+    assert response.json() == {"topics": ["offside", "handball", "goal-line", "penalty"]}
+
+
+def test_consistency_offside_topic():
+    response = client.get("/api/consistency/offside")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["topic"] == "offside"
+    assert data["today"]["moment_id"] == "offside_27"
+    assert len(data["historical_incidents"]) == 1
+
+
+def test_consistency_invalid_topic_returns_404():
+    response = client.get("/api/consistency/nonexistent")
+    assert response.status_code == 404
+
+
 def test_outrage_offtopic_take_has_no_moment():
     take = "What is the weather like today?"
     response = client.post("/api/outrage", json={"take": take})
