@@ -35,22 +35,39 @@
       border-bottom: 2px solid transparent;
     }
     nav.tabs button.active { color: var(--text); border-bottom-color: var(--accent); }
+    nav.tabs button:hover { color: var(--text); text-shadow: 0 0 8px var(--accent); }
     main { max-width: 960px; margin: 0 auto; padding: 20px 24px 60px; }
     .tab-panel { display: none; }
-    .tab-panel.active { display: block; }
+    .tab-panel.active { display: block; animation: fade-in 0.25s ease-out; }
+    @keyframes fade-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+    .card-hover { transition: transform 0.15s ease-out, box-shadow 0.15s ease-out; }
+    .card-hover:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.4); }
+    .score-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      border-radius: 6px; padding: 10px 16px; margin-top: 8px;
+      box-shadow: 0 0 20px rgba(0,224,255,0.15);
+    }
+    .score-bar .team-name { font-weight: 700; letter-spacing: 0.3px; text-shadow: 0 1px 4px rgba(0,0,0,0.85), 0 0 1px rgba(0,0,0,0.9); }
+    .score-bar .home { color: #fff; }
+    .score-bar .away { color: #fff; }
+    .score-bar .score { color: #fff; font-weight: 900; font-size: 1.2em; text-shadow: 0 0 12px rgba(0,224,255,0.9), 0 1px 4px rgba(0,0,0,0.85); }
+    .glow-bar-label { display: flex; justify-content: space-between; color: var(--muted); font-size: 0.75em; margin-bottom: 4px; }
+    .glow-bar { background: #1c1c24; border-radius: 6px; height: 10px; overflow: hidden; }
+    .glow-bar .fill { height: 100%; border-radius: 6px; width: 0; transition: width 0.6s ease-out; box-shadow: 0 0 10px currentColor; }
     .team-cards { display: flex; gap: 16px; margin-bottom: 20px; }
-    .team-card { flex: 1; background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 12px 16px; }
+    .team-card { flex: 1; background: var(--panel); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 6px; padding: 12px 16px; }
     .team-card .swatch {
       display: inline-block; width: 12px; height: 12px; border-radius: 50%;
       margin-right: 6px; vertical-align: middle;
     }
     .team-card h3 { margin: 0 0 6px; }
     .event-list { list-style: none; padding: 0; margin: 0; }
-    .event-list li {
-      padding: 8px 0; border-bottom: 1px solid var(--border);
-      display: flex; gap: 12px; align-items: baseline;
+    .event-row {
+      display: flex; align-items: center; gap: 10px; background: var(--panel);
+      border-left: 3px solid var(--accent); border-radius: 6px; padding: 10px 12px; margin-bottom: 8px;
     }
-    .event-list .minute { color: var(--accent); min-width: 3em; }
+    .event-row .icon { font-size: 1.1em; }
+    .event-row .minute { color: var(--accent); min-width: 3em; font-weight: 700; }
     .event-badge {
       display: inline-block; font-size: 0.75em; text-transform: uppercase;
       letter-spacing: 0.05em; background: var(--border); color: var(--muted);
@@ -70,7 +87,9 @@
     .law-badge {
       display: inline-block; background: var(--border); color: var(--muted);
       border-radius: 4px; padding: 4px 10px; font-size: 0.85em; margin-bottom: 8px;
+      transition: box-shadow 0.15s ease-out;
     }
+    .law-badge:hover { box-shadow: 0 0 8px rgba(0,224,255,0.4); }
     .confidence-line { color: var(--accent); font-weight: 600; }
     .analytics-table { border-collapse: collapse; margin: 8px 0; }
     .analytics-table th, .analytics-table td {
@@ -99,14 +118,19 @@
     .debate-cols > div { flex: 1; background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 12px; }
     .debate-cols h4 { margin-top: 0; }
     .badge { display: inline-block; padding: 2px 10px; border-radius: 4px; font-size: 0.8em; font-weight: 600; }
-    .badge.verified { background: #1f3d2a; color: #6fd98e; }
-    .badge.unverified { background: #3d2a1f; color: #f0a868; }
-    .confidence-card { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 12px 16px; margin: 12px 0; }
+    .badge.verified { background: #1f3d2a; color: #6fd98e; box-shadow: 0 0 8px rgba(111,217,142,0.5); }
+    .badge.unverified { background: #3d2a1f; color: #f0a868; box-shadow: 0 0 8px rgba(240,168,104,0.5); }
+    .confidence-card {
+      background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 12px 16px; margin: 12px 0;
+      transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
+    }
+    .confidence-card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.4); }
     .confidence-card .confidence-line { font-size: 1.4em; margin: 0 0 4px; }
     .lineage { font-family: monospace; color: var(--muted); font-size: 0.8em; margin-top: 16px; }
     .history-topics { display: flex; gap: 8px; margin: 12px 0; }
     .history-topics button { text-transform: capitalize; }
     .history-topics button.active { border-color: var(--accent); color: var(--accent); }
+    .history-topics button:hover { color: var(--accent); box-shadow: 0 0 8px rgba(0,224,255,0.3); }
     .incident-card { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 12px 16px; margin: 12px 0; }
     .incident-card h4 { margin: 0 0 4px; }
     .incident-card .incident-meta { color: var(--muted); font-size: 0.85em; margin-bottom: 8px; }
@@ -192,6 +216,24 @@
   <script>
     let matchData = null;
 
+    const EVENT_ICONS = { goal: '⚽', var_review: '🚩', tactical: '🔄', substitution: '🔁', pressure: '😓' };
+    const TOPIC_ICONS = { offside: '🚩', handball: '✋', 'goal-line': '📏', penalty: '⚖️' };
+
+    function renderGlowBar(label, pct, color) {
+      return '<div class="glow-bar-label"><span>' + label + '</span><span style="color:' + color + ';font-weight:700;">' +
+        (pct * 100).toFixed(1) + '%</span></div>' +
+        '<div class="glow-bar"><div class="fill" data-pct="' + (pct * 100) + '" style="background:' + color + ';color:' + color + '"></div></div>';
+    }
+
+    function animateGlowBars(container) {
+      container.querySelectorAll('.glow-bar .fill').forEach(function(el) {
+        const pct = el.dataset.pct;
+        requestAnimationFrame(function() {
+          requestAnimationFrame(function() { el.style.width = pct + '%'; });
+        });
+      });
+    }
+
     async function init() {
       try {
         const res = await fetch('/api/match');
@@ -213,15 +255,17 @@
       const header = document.getElementById('match-header');
       header.querySelector('.competition').textContent = matchData.competition;
       header.querySelector('h1').innerHTML =
-        '<span class="home">' + matchData.home.name + '</span> ' +
-        matchData.score.home + ' – ' + matchData.score.away +
-        ' <span class="away">' + matchData.away.name + '</span>';
+        '<div class="score-bar" style="background:linear-gradient(90deg, ' + matchData.home.color + ', ' + matchData.away.color + ')">' +
+        '<span class="team-name home">' + matchData.home.name + '</span>' +
+        '<span class="score">' + matchData.score.home + ' – ' + matchData.score.away + '</span>' +
+        '<span class="team-name away">' + matchData.away.name + '</span>' +
+        '</div>';
     }
 
     function renderOverview() {
       const teamCards = document.getElementById('team-cards');
       teamCards.innerHTML = [matchData.home, matchData.away].map(function(team) {
-        return '<div class="team-card">' +
+        return '<div class="team-card card-hover" style="border-left-color:' + team.color + '">' +
           '<h3><span class="swatch" style="background:' + team.color + '"></span>' + team.name + '</h3>' +
           '<div>' + team.formation_start + ' → ' + team.formation_end + '</div>' +
           '</div>';
@@ -229,7 +273,9 @@
 
       const eventList = document.getElementById('overview-events');
       eventList.innerHTML = matchData.events.map(function(e) {
-        return '<li><span class="minute">' + e.minute + '\'</span>' +
+        return '<li class="event-row">' +
+          '<span class="icon">' + (EVENT_ICONS[e.type] || '•') + '</span>' +
+          '<span class="minute">' + e.minute + '\'</span>' +
           '<span class="event-badge">' + e.type + '</span>' +
           '<span>' + e.desc + '</span></li>';
       }).join('');
@@ -262,7 +308,7 @@
       const topics = ['offside', 'handball', 'goal-line', 'penalty'];
       const container = document.getElementById('history-topics');
       container.innerHTML = topics.map(function(t) {
-        return '<button data-topic="' + t + '">' + t + '</button>';
+        return '<button data-topic="' + t + '">' + (TOPIC_ICONS[t] || '') + ' ' + t + '</button>';
       }).join('');
       container.querySelectorAll('button').forEach(function(btn) {
         btn.addEventListener('click', function() {
@@ -291,15 +337,15 @@
       let html = '';
       if (data.today) {
         html += '<div class="confidence-card">' +
-          '<div class="confidence-line">' + (data.today.confidence * 100).toFixed(1) + '%</div>' +
-          '<div>Today\'s call: ' + data.today.decision + '</div>' +
+          renderGlowBar('Today\'s call confidence', data.today.confidence, 'var(--accent)') +
+          '<div style="margin-top:6px;">Today\'s call: ' + data.today.decision + '</div>' +
           '</div>';
       } else {
         html += '<p>This match has no ' + topic + ' review to compare against — here\'s the history.</p>';
       }
 
       html += data.historical_incidents.map(function(incident) {
-        let card = '<div class="incident-card">' +
+        let card = '<div class="incident-card card-hover">' +
           '<h4>' + incident.title + ' (' + incident.year + ')</h4>' +
           '<div class="incident-meta">' + incident.match + '</div>' +
           '<p>' + incident.description + '</p>' +
@@ -312,6 +358,7 @@
       }).join('');
 
       result.innerHTML = html;
+      animateGlowBars(result);
     }
 
     const MOMENT_ORDER = ['offside_27', 'handball_38', 'halftime_shift', 'sub_58', 'goal_home_1', 'fatigue_71', 'goal_home_2'];
@@ -328,7 +375,9 @@
     function buildMomentsSidebar() {
       const sidebar = document.getElementById('moments-sidebar');
       sidebar.innerHTML = MOMENT_ORDER.map(function(id) {
-        return '<li><button data-moment="' + id + '">' + MOMENT_LABELS[id] + '</button></li>';
+        const event = matchData.events.find(function(e) { return e.id === id; });
+        const icon = event ? (EVENT_ICONS[event.type] || '•') : '•';
+        return '<li><button data-moment="' + id + '">' + icon + ' ' + MOMENT_LABELS[id] + '</button></li>';
       }).join('');
       sidebar.querySelectorAll('button').forEach(function(btn) {
         btn.addEventListener('click', function() { selectMoment(btn.dataset.moment); });
@@ -363,6 +412,7 @@
       } else {
         detail.innerHTML = renderTextMoment(moment);
       }
+      animateGlowBars(detail);
     }
 
     function renderTextMoment(moment) {
@@ -371,7 +421,7 @@
         html += '<div class="law-badge">' + moment.law + '</div>';
       }
       html += '<p class="decision">' + moment.decision + '</p>';
-      html += '<p class="confidence-line">Confidence: ' + Math.round(moment.confidence * 100) + '%</p>';
+      html += renderGlowBar('Confidence', moment.confidence, 'var(--accent)');
       html += '<p>' + moment.summary + '</p>';
       html += '<h3>Evidence</h3><ul>' + moment.evidence.map(function(e) { return '<li>' + e + '</li>'; }).join('') + '</ul>';
       if (moment.analytics) {
@@ -581,15 +631,17 @@
       }
 
       html += '<div class="confidence-card">' +
-        '<div class="confidence-line">' + (ex.confidence * 100).toFixed(1) + '%</div>' +
-        '<div>' + ex.confidence_basis + '</div>' +
+        renderGlowBar('Confidence', ex.confidence, 'var(--accent)') +
+        '<div style="margin-top:6px;">' + ex.confidence_basis + '</div>' +
         '</div>';
 
-      html += '<h3>Sources</h3><ul>' + ex.sources.map(function(s) {
-        return '<li>' + s.title + ' (' + s.source + ', score ' + s.score.toFixed(2) + ')</li>';
-      }).join('') + '</ul>';
+      html += '<h3>Sources</h3>' + ex.sources.map(function(s) {
+        return '<div class="event-row"><span>' + s.title + ' (' + s.source + ', score ' + s.score.toFixed(2) + ')</span></div>';
+      }).join('');
 
-      html += '<h3>Evidence</h3><ul>' + ex.evidence.map(function(e) { return '<li>' + e + '</li>'; }).join('') + '</ul>';
+      html += '<h3>Evidence</h3>' + ex.evidence.map(function(e) {
+        return '<div class="event-row"><span>' + e + '</span></div>';
+      }).join('');
 
       if (ex.counterfactual) {
         html += '<div class="callout">' + ex.counterfactual + '</div>';
@@ -597,14 +649,15 @@
 
       if (ex.debate) {
         html += '<div class="debate-cols">' +
-          '<div><h4>Stands</h4><p>' + ex.debate.stands + '</p></div>' +
-          '<div><h4>Overturn</h4><p>' + ex.debate.overturn + '</p></div>' +
+          '<div class="card-hover"><h4>Stands</h4><p>' + ex.debate.stands + '</p></div>' +
+          '<div class="card-hover"><h4>Overturn</h4><p>' + ex.debate.overturn + '</p></div>' +
           '</div>';
       }
 
       html += '<p class="lineage">' + ex.lineage + '</p>';
 
       result.innerHTML = html;
+      animateGlowBars(result);
     });
 
     document.getElementById('outrage-form').addEventListener('submit', async (event) => {
@@ -632,8 +685,8 @@
 
       if (data.steelman) {
         html += '<div class="debate-cols">' +
-          '<div><h4>Your side</h4><p>' + data.steelman + '</p></div>' +
-          '<div><h4>The counter-case</h4>';
+          '<div class="card-hover"><h4>Your side</h4><p>' + data.steelman + '</p></div>' +
+          '<div class="card-hover"><h4>The counter-case</h4>';
         if (data.verification) {
           html += data.verification.verified
             ? '<span class="badge verified">Verified</span> '
@@ -641,6 +694,7 @@
         }
         html += '<p>' + data.counter + '</p></div>' +
           '</div>';
+        html += '<div class="confidence-card">' + renderGlowBar('Confidence', data.confidence, 'var(--accent)') + '</div>';
         html += '<div class="callout">' + data.verdict + '</div>';
       } else {
         html += '<div class="callout">This isn\'t a contested officiating call, so there\'s no counter-case here — just what happened.</div>';
@@ -649,6 +703,7 @@
       html += '<p class="lineage">' + data.lineage + '</p>';
 
       result.innerHTML = html;
+      animateGlowBars(result);
     });
 
     init();
