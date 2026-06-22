@@ -28,11 +28,11 @@
     header.match-header h1 { margin: 0; font-size: 1.4em; }
     header.match-header h1 .home { color: var(--home); }
     header.match-header h1 .away { color: var(--away); }
-    nav.tabs { display: flex; gap: 4px; padding: 0 24px; border-bottom: 1px solid var(--border); }
+    nav.tabs { display: flex; gap: 4px; padding: 0 24px; border-bottom: 1px solid var(--border); overflow-x: auto; }
     nav.tabs button {
       background: none; border: none; color: var(--muted);
       padding: 12px 18px; font-size: 1em; cursor: pointer;
-      border-bottom: 2px solid transparent;
+      border-bottom: 2px solid transparent; white-space: nowrap; flex-shrink: 0;
     }
     nav.tabs button.active { color: var(--text); border-bottom-color: var(--accent); }
     nav.tabs button:hover { color: var(--text); text-shadow: 0 0 8px var(--accent); }
@@ -483,6 +483,10 @@
     function setupTabs() {
       document.querySelectorAll('nav.tabs button').forEach(function(btn) {
         btn.addEventListener('click', function() {
+          const previousTab = document.querySelector('nav.tabs button.active');
+          if (previousTab && previousTab.dataset.tab === 'live-replay' && btn.dataset.tab !== 'live-replay' && replayPlaying) {
+            pauseReplay();
+          }
           document.querySelectorAll('nav.tabs button').forEach(function(b) { b.classList.remove('active'); });
           document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
           btn.classList.add('active');
