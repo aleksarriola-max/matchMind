@@ -55,7 +55,8 @@
       border-radius: 6px; padding: 10px 16px; margin-top: 8px;
       box-shadow: 0 0 20px rgba(0,224,255,0.15);
     }
-    .score-bar .team-name { font-weight: 700; letter-spacing: 0.3px; text-shadow: 0 1px 4px rgba(0,0,0,0.85), 0 0 1px rgba(0,0,0,0.9); }
+    .score-bar .team-name { font-weight: 700; letter-spacing: 0.3px; text-shadow: 0 1px 4px rgba(0,0,0,0.85), 0 0 1px rgba(0,0,0,0.9); display: inline-flex; align-items: center; gap: 8px; }
+    .score-bar .flag { border-radius: 2px; box-shadow: 0 0 0 1px rgba(255,255,255,0.4); flex-shrink: 0; }
     .score-bar .home { color: #fff; }
     .score-bar .away { color: #fff; }
     .score-bar .score { color: #fff; font-weight: 900; font-size: 1.2em; text-shadow: 0 0 12px rgba(0,224,255,0.9), 0 1px 4px rgba(0,0,0,0.85); }
@@ -418,14 +419,19 @@
       setupTabs();
     }
 
+    const TEAM_FLAGS = {
+      Argentina: '<svg width="20" height="14" viewBox="0 0 30 20" class="flag"><rect width="30" height="20" fill="#75AADB"/><rect y="6.67" width="30" height="6.67" fill="#fff"/></svg>',
+      France: '<svg width="20" height="14" viewBox="0 0 30 20" class="flag"><rect width="10" height="20" fill="#0055A4"/><rect x="10" width="10" height="20" fill="#fff"/><rect x="20" width="10" height="20" fill="#EF4135"/></svg>',
+    };
+
     function renderHeader() {
       const header = document.getElementById('match-header');
       header.querySelector('.competition').textContent = matchData.competition;
       header.querySelector('h1').innerHTML =
         '<div class="score-bar" style="background:linear-gradient(90deg, ' + matchData.home.color + ', ' + matchData.away.color + ')">' +
-        '<span class="team-name home">' + matchData.home.name + '</span>' +
+        '<span class="team-name home">' + (TEAM_FLAGS[matchData.home.name] || '') + matchData.home.name + '</span>' +
         '<span class="score">' + matchData.score.home + ' – ' + matchData.score.away + '</span>' +
-        '<span class="team-name away">' + matchData.away.name + '</span>' +
+        '<span class="team-name away">' + matchData.away.name + (TEAM_FLAGS[matchData.away.name] || '') + '</span>' +
         '</div>';
     }
 
