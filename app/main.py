@@ -1,6 +1,6 @@
 import streamlit as st
 
-from app import overview, styles
+from app import moments, overview, styles
 from backend.engines import analytics, explainer
 
 st.set_page_config(page_title="MatchMind", layout="centered")
@@ -28,7 +28,7 @@ with tab_overview:
     overview.render_overview(match_data)
 
 with tab_moments:
-    st.write("Moments — coming in Task 6")
+    moments.render_moments(match_data)
 
 with tab_ask:
     st.write("Ask MatchMind — coming in Task 7")
