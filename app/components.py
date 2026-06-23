@@ -275,3 +275,17 @@ def render_decision_lab_pitch_html(
     html += f'<p class="confidence-line">Confidence: {moment["confidence"] * 100:.1f}% (z = {moment["analytics"]["offside_probability"]["result"]["z"]})</p>'
 
     return html
+
+
+def render_incident_card_html(incident: dict) -> str:
+    html = (
+        '<div class="incident-card">'
+        f'<h4>{incident["title"]} ({incident["year"]})</h4>'
+        f'<div class="incident-meta">{incident["match"]}</div>'
+        f'<p>{incident["description"]}</p>'
+        f'<p><strong>Decision:</strong> {incident["decision"]}</p>'
+    )
+    if incident.get("comparison_to_today"):
+        html += f'<div class="callout">{incident["comparison_to_today"]}</div>'
+    html += "</div>"
+    return html

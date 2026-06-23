@@ -132,3 +132,19 @@ def test_render_decision_lab_pitch_html_uncertainty_band_toggle():
     without_band = components.render_decision_lab_pitch_html(moment, match_data, False, False)
     assert "95% CI" in with_band
     assert "95% CI" not in without_band
+
+
+def test_render_incident_card_html_includes_title_year_and_decision():
+    incident = {
+        "title": "Hand of God",
+        "year": 1986,
+        "match": "Argentina vs England",
+        "description": "Maradona punched the ball into the net.",
+        "decision": "Goal stood — missed by officials.",
+        "comparison_to_today": "VAR would have caught this instantly.",
+    }
+    html = components.render_incident_card_html(incident)
+    assert "Hand of God" in html
+    assert "1986" in html
+    assert "Goal stood" in html
+    assert "VAR would have caught this instantly." in html
