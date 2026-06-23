@@ -90,6 +90,7 @@ def _render_real_incident(match_data: dict) -> None:
         if st.button("\U0001F30D Show a real incident: 2022 World Cup Final"):
             try:
                 st.session_state["real_incident_data"] = real_incident.get_real_incident()
+                st.rerun()
             except Exception:
                 st.error("Could not load real incident data — StatsBomb's open-data repo may be unreachable.")
         return
