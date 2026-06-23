@@ -189,6 +189,12 @@
     .incident-card { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 12px 16px; margin: 12px 0; }
     .incident-card h4 { margin: 0 0 4px; }
     .incident-card .incident-meta { color: var(--muted); font-size: 0.85em; margin-bottom: 8px; }
+    .real-incident-wrap { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
+    .real-incident-wrap button {
+      background: var(--panel); border: 1px solid var(--accent); color: var(--accent);
+      padding: 8px 14px; border-radius: 4px; cursor: pointer; font-size: 0.9em;
+    }
+    .real-incident-wrap .incident-meta { margin-top: 10px; }
     .replay-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
     .replay-minute { font-size: 1.8em; font-weight: 900; }
     .replay-minute .tick { font-size: 0.6em; color: var(--muted); }
@@ -915,7 +921,63 @@
           '</div>';
       }
 
+      html += '<div class="real-incident-wrap">' +
+        '<button id="load-real-incident-btn" onclick="loadRealIncident()">🌍 Show a real incident: 2022 World Cup Final</button>' +
+        '<div id="real-incident-result"></div>' +
+        '</div>';
+
       return html;
+    }
+
+    async function loadRealIncident() {
+      const btn = document.getElementById('load-real-incident-btn');
+      const result = document.getElementById('real-incident-result');
+      btn.disabled = true;
+      btn.textContent = 'Loading real match data from StatsBomb…';
+      let data;
+      try {
+        const res = await fetch('/api/real-incident');
+        if (!res.ok) throw new Error('status ' + res.status);
+        data = await res.json();
+      } catch (err) {
+        result.innerHTML = '<div class="error">Could not load real incident data — StatsBomb\'s open-data repo may be unreachable.</div>';
+        btn.disabled = false;
+        btn.textContent = '🌍 Show a real incident: 2022 World Cup Final';
+        return;
+      }
+      btn.style.display = 'none';
+      result.innerHTML = renderRealIncident(data);
+    }
+
+    function renderRealIncident(data) {
+      const scaleX = 100 / 120, scaleY = 68 / 80;
+      const toX = function(x) { return x * scaleX; };
+      const toY = function(y) { return y * scaleY; };
+
+      let svg = '<svg viewBox="-2 -2 104 72" class="pitch-svg">' +
+        '<rect x="-2" y="-2" width="104" height="72" fill="#1a6e38"/>' +
+        '<g stroke="#eaf5ee" stroke-width="0.35" fill="none" opacity="0.7">' +
+        '<rect x="0" y="0" width="100" height="68"/><line x1="50" y1="0" x2="50" y2="68"/>' +
+        '<circle cx="50" cy="34" r="8.7"/></g>';
+
+      data.freeze_frame.forEach(function(p) {
+        const color = p.teammate ? matchData.away.color : matchData.home.color;
+        svg += '<circle cx="' + toX(p.location[0]) + '" cy="' + toY(p.location[1]) + '" r="1.3" fill="' + color + '" stroke="#fff" stroke-width="0.2" opacity="0.7"/>';
+      });
+
+      const mb = data.mbappe_position, def = data.second_last_opponent_position;
+      svg += '<line x1="' + toX(def[0]) + '" y1="-2" x2="' + toX(def[0]) + '" y2="70" stroke="#00e0ff" stroke-width="0.4" opacity="0.6"/>';
+      svg += playerCircle({ x: toX(mb[0]), y: toY(mb[1]), label: 'M' }, matchData.away.color, '#ff4d4d', 0.4);
+      svg += playerCircle({ x: toX(def[0]), y: toY(def[1]), label: 'D' }, matchData.home.color, '#ffffff', 0.25);
+      svg += '</svg>';
+
+      return '<div class="incident-meta">' + data.match.competition + ' — ' + data.match.home_team + ' vs ' + data.match.away_team + ', ' + data.match.date + '</div>' +
+        '<p>' + data.minute + '\' — ' + data.passer + ' → ' + data.recipient + ' (offside, real StatsBomb data)</p>' +
+        '<div class="pitch-wrap">' + svg + '</div>' +
+        '<p class="confidence-line">Real measured margin: ' + data.margin_cm.toFixed(1) + ' cm</p>' +
+        '<div class="callout">Illustrative — applies our uncertainty model to real position data. StatsBomb does not publish camera/tracking error margins, so this is not an official measurement.</div>' +
+        '<ul>' + data.approximation_notes.map(function(n) { return '<li>' + n + '</li>'; }).join('') + '</ul>' +
+        '<p class="lineage">Data: <a href="' + data.source_url + '" target="_blank" rel="noopener">StatsBomb — Data Champions.</a> (Open Data, used under their research/analysis license)</p>';
     }
 
     document.getElementById('ask-form').addEventListener('submit', async (event) => {

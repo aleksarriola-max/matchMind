@@ -4,7 +4,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, field_validator
 
-from backend.engines import analytics, consistency, explainer
+from backend.engines import analytics, consistency, explainer, real_incident as real_incident_engine
 from backend.engines.verifier import verify
 from backend.llm import adapter
 from backend.rag.retriever import get_retriever
@@ -202,3 +202,11 @@ def consistency_compare(topic: str):
     if topic not in consistency.VALID_TOPICS:
         raise HTTPException(status_code=404, detail=f"Unknown topic: {topic!r}")
     return consistency.compare(topic)
+
+
+@app.get("/api/real-incident")
+def real_incident():
+    try:
+        return real_incident_engine.get_real_incident()
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"Could not fetch StatsBomb data: {exc}")
