@@ -76,3 +76,59 @@ def test_render_momentum_chart_html_clips_to_current_minute():
     # the clipped version has a "now" pulse marker the full one doesn't
     assert "pulse" not in html_full or "pulse" in html_clipped
     assert html_clipped != html_full
+
+
+def _sample_offside_moment():
+    return {
+        "title": "Argentina goal disallowed",
+        "law": "Law 11",
+        "decision": "Goal disallowed for offside",
+        "confidence": 0.997,
+        "margin_cm": 11.0,
+        "camera_frame_uncertainty_cm": 6.0,
+        "pitch": {
+            "offside_line_x": 60.0,
+            "ball": {"x": 62.0, "y": 34.0},
+            "passer": {"x": 55.0, "y": 30.0, "label": "#8"},
+            "attacker": {"x": 61.0, "y": 36.0, "label": "#9"},
+            "second_last_defender": {"x": 60.0, "y": 32.0, "label": "#4"},
+            "keeper": {"x": 95.0, "y": 34.0, "label": "#1"},
+            "others": [{"x": 50.0, "y": 20.0, "team": "home"}],
+            "assistant_referee": {"x": 60.0, "y": 70.0, "label": "AR1"},
+        },
+        "analytics": {
+            "offside_probability": {
+                "result": {"probability": 0.997, "z": 2.78},
+                "inputs": {"camera_frame_uncertainty_cm": 6.0, "sigma_line_cm": 2.5},
+            }
+        },
+    }
+
+
+def _sample_match_data_for_pitch():
+    return {"home": {"name": "Argentina", "color": "#75AADB"}, "away": {"name": "France", "color": "#0055A4"}}
+
+
+def test_render_decision_lab_pitch_html_contains_offside_line_and_margin():
+    html = components.render_decision_lab_pitch_html(
+        _sample_offside_moment(), _sample_match_data_for_pitch(), show_sightline=False, show_uncertainty_band=True
+    )
+    assert "<svg" in html
+    assert "OFFSIDE" in html
+    assert "11.0 cm" in html
+    assert "99.7%" in html
+
+
+def test_render_decision_lab_pitch_html_sightline_toggle_adds_lines():
+    moment, match_data = _sample_offside_moment(), _sample_match_data_for_pitch()
+    without = components.render_decision_lab_pitch_html(moment, match_data, False, True)
+    with_sightline = components.render_decision_lab_pitch_html(moment, match_data, True, True)
+    assert len(with_sightline) > len(without)
+
+
+def test_render_decision_lab_pitch_html_uncertainty_band_toggle():
+    moment, match_data = _sample_offside_moment(), _sample_match_data_for_pitch()
+    with_band = components.render_decision_lab_pitch_html(moment, match_data, False, True)
+    without_band = components.render_decision_lab_pitch_html(moment, match_data, False, False)
+    assert "95% CI" in with_band
+    assert "95% CI" not in without_band

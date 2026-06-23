@@ -1,3 +1,5 @@
+import math
+
 EVENT_ICONS = {
     "goal": "⚽",
     "var_review": "🚩",
@@ -162,3 +164,114 @@ def render_momentum_chart_html(title_html: str, match_data: dict, current_minute
         f'<text x="{width - margin_x}" y="{height - 4}" class="axis-label" text-anchor="end">90\'</text>'
         "</svg></div>"
     )
+
+
+def player_circle_html(x: float, y: float, label: str, fill_color: str, stroke_color: str, stroke_width: float) -> str:
+    number = label.split("#")[1] if "#" in label else label
+    return (
+        f'<circle cx="{x}" cy="{y}" r="1.6" fill="{fill_color}" stroke="{stroke_color}" stroke-width="{stroke_width}"/>'
+        f'<text x="{x}" y="{y + 0.7}" fill="#fff" font-size="1.8" text-anchor="middle">{number}</text>'
+    )
+
+
+def render_decision_lab_pitch_html(
+    moment: dict, match_data: dict, show_sightline: bool, show_uncertainty_band: bool
+) -> str:
+    p = moment["pitch"]
+    home_color, away_color = match_data["home"]["color"], match_data["away"]["color"]
+    line_x = p["offside_line_x"]
+
+    html = (
+        f'<div class="law-badge">{moment["law"]}</div>' if moment.get("law") else ""
+    )
+    html += f'<p class="decision">{moment["decision"]}</p>'
+
+    html += (
+        '<div class="lab-banner">'
+        f'<div class="crest" style="background:{home_color}">{match_data["home"]["name"][0]}</div>'
+        '<span class="var-label"><span class="pulse-dot"></span>VAR Review</span>'
+        f'<div class="crest" style="background:{away_color}">{match_data["away"]["name"][0]}</div>'
+        "</div>"
+    )
+
+    html += '<div class="pitch-wrap"><svg viewBox="-2 -2 104 72" class="pitch-svg">'
+    html += '<rect x="-2" y="-2" width="104" height="72" fill="#1a6e38"/>'
+    html += '<g stroke="#eaf5ee" stroke-width="0.35" fill="none" opacity="0.9">'
+    html += '<rect x="0" y="0" width="100" height="68"/><line x1="50" y1="0" x2="50" y2="68"/>'
+    html += '<circle cx="50" cy="34" r="8.7"/><circle cx="50" cy="34" r="0.5" fill="#eaf5ee"/>'
+    html += '<rect x="84.3" y="13.8" width="15.7" height="40.3"/><rect x="94.8" y="24.8" width="5.2" height="18.3"/>'
+    html += '<rect x="0" y="13.8" width="15.7" height="40.3"/><rect x="0" y="24.8" width="5.2" height="18.3"/>'
+    html += "</g>"
+
+    html += f'<line x1="{line_x}" y1="-2" x2="{line_x}" y2="70" stroke="#00e0ff" stroke-width="0.5"/>'
+    html += f'<line x1="{line_x}" y1="-2" x2="{line_x}" y2="70" stroke="#00e0ff" stroke-width="1.6" opacity="0.25"/>'
+
+    if show_sightline:
+        ar = p["assistant_referee"]
+        html += (
+            f'<line x1="{ar["x"]}" y1="{ar["y"] + 0.5}" x2="{p["attacker"]["x"]}" y2="{p["attacker"]["y"]}" '
+            'stroke="#ffe14d" stroke-width="0.25" stroke-dasharray="0.8,0.6" opacity="0.85"/>'
+        )
+        html += (
+            f'<line x1="{ar["x"]}" y1="{ar["y"] + 0.5}" x2="{p["second_last_defender"]["x"]}" '
+            f'y2="{p["second_last_defender"]["y"]}" stroke="#ffe14d" stroke-width="0.25" '
+            'stroke-dasharray="0.8,0.6" opacity="0.5"/>'
+        )
+
+    for o in p["others"]:
+        color = home_color if o["team"] == "home" else away_color
+        html += f'<circle cx="{o["x"]}" cy="{o["y"]}" r="1.5" fill="{color}" stroke="#ffffff" stroke-width="0.2" opacity="0.65"/>'
+
+    html += f'<circle cx="{p["ball"]["x"]}" cy="{p["ball"]["y"]}" r="0.9" fill="#fff" stroke="#333" stroke-width="0.15"/>'
+    html += player_circle_html(p["passer"]["x"], p["passer"]["y"], p["passer"]["label"], home_color, "#ffffff", 0.25)
+    html += player_circle_html(
+        p["second_last_defender"]["x"], p["second_last_defender"]["y"], p["second_last_defender"]["label"],
+        away_color, "#ffffff", 0.25,
+    )
+    html += player_circle_html(p["attacker"]["x"], p["attacker"]["y"], p["attacker"]["label"], home_color, "#ff4d4d", 0.4)
+    html += player_circle_html(p["keeper"]["x"], p["keeper"]["y"], p["keeper"]["label"], away_color, "#ffffff", 0.25)
+
+    ar = p["assistant_referee"]
+    html += f'<circle cx="{ar["x"]}" cy="{ar["y"] + 0.3}" r="1" fill="#ffe14d"/>'
+    html += f'<text x="{ar["x"]}" y="{ar["y"] - 0.6}" fill="#ffe14d" font-size="2" text-anchor="middle">{ar["label"]}</text>'
+    html += "</svg></div>"
+
+    probability = moment["analytics"]["offside_probability"]["result"]["probability"]
+    html += (
+        '<div class="lower-third">'
+        f'<strong>OFFSIDE — {p["attacker"]["label"].upper()}</strong>'
+        f'<span>Margin: {moment["margin_cm"]:.1f} cm &nbsp;|&nbsp; Confidence: {probability * 100:.1f}%</span>'
+        "</div>"
+    )
+
+    inputs = moment["analytics"]["offside_probability"]["inputs"]
+    sigma_frame = inputs["camera_frame_uncertainty_cm"] / 1.96
+    sigma_total = math.sqrt(sigma_frame ** 2 + inputs["sigma_line_cm"] ** 2)
+    ci_half_width = 1.96 * sigma_total
+    margin = moment["margin_cm"]
+    attacker_x = 110 + margin
+    defender_num = p["second_last_defender"]["label"].split("#")[1]
+    attacker_num = p["attacker"]["label"].split("#")[1]
+
+    html += '<div class="inset-wrap"><svg viewBox="0 0 220 60" class="inset-svg">'
+    if show_uncertainty_band:
+        html += (
+            f'<rect x="{110 - ci_half_width}" y="6" width="{2 * ci_half_width}" height="48" '
+            'fill="#00e0ff" opacity="0.18"/>'
+        )
+        html += f'<text x="110" y="58" fill="#00e0ff" font-size="5.5" text-anchor="middle">±{ci_half_width:.1f}cm (95% CI)</text>'
+    html += '<line x1="110" y1="2" x2="110" y2="54" stroke="#00e0ff" stroke-width="1"/>'
+    html += '<text x="110" y="10" fill="#00e0ff" font-size="6" text-anchor="middle">offside line</text>'
+    html += f'<line x1="40" y1="40" x2="110" y2="40" stroke="{away_color}" stroke-width="1"/>'
+    html += f'<circle cx="40" cy="40" r="2.5" fill="{away_color}"/>'
+    html += f'<text x="30" y="43" fill="{away_color}" font-size="6" text-anchor="end">#{defender_num}</text>'
+    html += f'<line x1="40" y1="20" x2="{attacker_x}" y2="20" stroke="{home_color}" stroke-width="1"/>'
+    html += f'<circle cx="{attacker_x}" cy="20" r="2.5" fill="{home_color}" stroke="#ff4d4d" stroke-width="0.8"/>'
+    html += f'<text x="{attacker_x + 10}" y="23" fill="{home_color}" font-size="6" text-anchor="start">#{attacker_num} (+{margin}cm)</text>'
+    html += f'<line x1="110" y1="30" x2="{attacker_x}" y2="30" stroke="#fff" stroke-width="0.6"/>'
+    html += f'<text x="{(110 + attacker_x) / 2}" y="29" fill="#fff" font-size="5" text-anchor="middle">{margin}cm</text>'
+    html += "</svg></div>"
+
+    html += f'<p class="confidence-line">Confidence: {moment["confidence"] * 100:.1f}% (z = {moment["analytics"]["offside_probability"]["result"]["z"]})</p>'
+
+    return html
