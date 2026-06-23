@@ -1,6 +1,6 @@
 import streamlit as st
 
-from app import ask, moments, overview, styles
+from app import ask, debate, moments, overview, styles
 from backend.engines import analytics, explainer
 
 st.set_page_config(page_title="MatchMind", layout="centered")
@@ -34,7 +34,7 @@ with tab_ask:
     ask.render_ask()
 
 with tab_debate:
-    st.write("Debate — coming in Task 8")
+    debate.render_debate()
 
 with tab_history:
     st.write("History — coming in Task 9")
