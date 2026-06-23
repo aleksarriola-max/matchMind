@@ -33,7 +33,7 @@ def escape_html(text: str) -> str:
 
 
 def escape_attr(text: str) -> str:
-    return text.replace("&", "&amp;").replace('"', "&quot;")
+    return text.replace("&", "&amp;").replace('"', "&quot;").replace("<", "&lt;").replace(">", "&gt;").replace("'", "&#39;")
 
 
 def render_header_html(match_data: dict) -> str:
