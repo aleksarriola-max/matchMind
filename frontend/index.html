@@ -85,6 +85,11 @@
       letter-spacing: 0.05em; background: var(--border); color: var(--muted);
       border-radius: 4px; padding: 2px 6px;
     }
+    .event-badge-goal { background: rgba(245, 197, 24, 0.18); color: #f5c518; }
+    .event-badge-var_review { background: rgba(230, 57, 70, 0.18); color: #e63946; }
+    .event-badge-tactical { background: rgba(0, 212, 255, 0.18); color: #00d4ff; }
+    .event-badge-substitution { background: rgba(255, 124, 0, 0.18); color: #ff7c00; }
+    .event-badge-pressure { background: rgba(155, 89, 182, 0.18); color: #c389e0; }
     .error { color: #ff6b6b; padding: 20px; }
     .moments-layout { display: flex; gap: 20px; align-items: flex-start; }
     .moments-sidebar { list-style: none; padding: 0; margin: 0; min-width: 200px; }
@@ -438,7 +443,7 @@
         return '<li class="event-row">' +
           '<span class="icon">' + (EVENT_ICONS[e.type] || '•') + '</span>' +
           '<span class="minute">' + e.minute + '\'</span>' +
-          '<span class="event-badge">' + e.type + '</span>' +
+          '<span class="event-badge event-badge-' + e.type + '">' + e.type + '</span>' +
           '<span>' + e.desc + '</span></li>';
       }).join('');
 
@@ -1102,7 +1107,7 @@
         return '<div class="event-row">' +
           '<span class="icon">' + (EVENT_ICONS[e.type] || '•') + '</span>' +
           '<span class="minute">' + e.minute + '\'</span>' +
-          '<span class="event-badge">' + e.type + '</span>' +
+          '<span class="event-badge event-badge-' + e.type + '">' + e.type + '</span>' +
           '<span>' + e.desc + '</span></div>';
       }).join('');
 
