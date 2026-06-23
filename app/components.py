@@ -91,3 +91,74 @@ def speak_button_html(text: str) -> str:
         "});"
         "</script></body></html>"
     )
+
+
+def lighten_for_fill(hex_color: str) -> str:
+    r = int(hex_color[1:3], 16)
+    g = int(hex_color[3:5], 16)
+    b = int(hex_color[5:7], 16)
+    mix = lambda c: round(c + (255 - c) * 0.45)
+    return f"rgb({mix(r)},{mix(g)},{mix(b)})"
+
+
+def render_momentum_chart_html(title_html: str, match_data: dict, current_minute: int | None = None) -> str:
+    curve = match_data["momentum"]
+    max_abs = max(1.0, max(abs(p["value"]) for p in curve))
+    width, height, margin_x, baseline_y, half_height = 380, 130, 10, 65, 50
+    clipped = current_minute is not None
+    visible = [p for p in curve if not clipped or p["minute"] <= current_minute] if clipped else curve
+
+    def x_pos(minute):
+        return margin_x + (minute / 90) * (width - 2 * margin_x)
+
+    def y_pos(value):
+        return baseline_y - (value / max_abs) * half_height
+
+    points = " ".join(f"{x_pos(p['minute'])},{y_pos(p['value'])}" for p in visible)
+
+    home_color, away_color = match_data["home"]["color"], match_data["away"]["color"]
+
+    area_path = ""
+    if len(visible) > 1:
+        first_x, last_x = x_pos(visible[0]["minute"]), x_pos(visible[-1]["minute"])
+        mid = " L ".join(f"{x_pos(p['minute'])},{y_pos(p['value'])}" for p in visible)
+        area_path = f"M {first_x},{baseline_y} L {mid} L {last_x},{baseline_y} Z"
+
+    now_marker = ""
+    if clipped and visible:
+        last = visible[-1]
+        now_marker = (
+            f'<circle cx="{x_pos(last["minute"])}" cy="{y_pos(last["value"])}" r="4" fill="#fff" '
+            f'class="pulse"/>'
+        )
+
+    clip_above = (
+        f'<clipPath id="clip-above"><rect x="0" y="0" width="{width}" height="{baseline_y}"/></clipPath>'
+    )
+    clip_below = (
+        f'<clipPath id="clip-below"><rect x="0" y="{baseline_y}" width="{width}" '
+        f'height="{height - baseline_y}"/></clipPath>'
+    )
+
+    area_above = (
+        f'<path d="{area_path}" fill="{lighten_for_fill(home_color)}" opacity="0.35" clip-path="url(#clip-above)"/>'
+        if area_path else ""
+    )
+    area_below = (
+        f'<path d="{area_path}" fill="{lighten_for_fill(away_color)}" opacity="0.35" clip-path="url(#clip-below)"/>'
+        if area_path else ""
+    )
+
+    return (
+        f'<div class="momentum-chart-wrap">{title_html}'
+        f'<svg viewBox="0 0 {width} {height}" class="momentum-chart-svg">'
+        f"<defs>{clip_above}{clip_below}</defs>"
+        f"{area_above}{area_below}"
+        f'<line x1="{margin_x}" y1="{baseline_y}" x2="{width - margin_x}" y2="{baseline_y}" '
+        'stroke="#333" stroke-width="1" stroke-dasharray="3,3"/>'
+        f'<polyline points="{points}" fill="none" stroke="{home_color}" stroke-width="2.5"/>'
+        f"{now_marker}"
+        f'<text x="{margin_x}" y="{height - 4}" class="axis-label">0\'</text>'
+        f'<text x="{width - margin_x}" y="{height - 4}" class="axis-label" text-anchor="end">90\'</text>'
+        "</svg></div>"
+    )
