@@ -32,6 +32,13 @@
     @keyframes drift3 { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(30px, -30px); } }
     a { color: var(--accent); }
     header.match-header { padding: 16px 24px; border-bottom: 1px solid var(--border); }
+    .brand { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .brand .crest {
+      width: 28px; height: 28px; border-radius: 50%; background: var(--panel); border: 2px solid var(--accent);
+      color: var(--accent); display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 0 10px rgba(0,224,255,0.4);
+    }
+    .brand .wordmark { font-weight: 700; font-size: 1.1em; color: var(--text); letter-spacing: 0.3px; }
     header.match-header .competition { color: var(--muted); font-size: 0.9em; margin: 0 0 4px; }
     header.match-header h1 { margin: 0; font-size: 1.4em; }
     header.match-header h1 .home { color: var(--home); }
@@ -231,6 +238,12 @@
     <div class="bg-blob bg-blob-green"></div>
   </div>
   <header class="match-header" id="match-header">
+    <div class="brand">
+      <div class="crest">
+        <svg width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="3" fill="currentColor"/><path d="M10 1 L10 5 M10 15 L10 19 M1 10 L5 10 M15 10 L19 10" stroke="currentColor" stroke-width="1.5"/></svg>
+      </div>
+      <span class="wordmark">MatchMind</span>
+    </div>
     <p class="competition"></p>
     <h1></h1>
   </header>
