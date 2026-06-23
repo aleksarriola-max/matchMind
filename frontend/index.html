@@ -209,6 +209,19 @@
       background: none; border: 1px solid var(--border); border-radius: 4px; color: var(--accent);
       cursor: pointer; padding: 2px 8px; margin-left: 8px; font-size: 0.9em;
     }
+    .chat-bubbles { margin-bottom: 16px; }
+    .chat-row { display: flex; margin-bottom: 12px; }
+    .chat-row-user { justify-content: flex-end; }
+    .chat-row-ai { justify-content: flex-start; align-items: flex-start; gap: 8px; }
+    .chat-avatar {
+      width: 26px; height: 26px; border-radius: 50%; background: var(--panel); border: 1px solid var(--accent);
+      display: flex; align-items: center; justify-content: center; font-size: 0.7em; font-weight: 700;
+      color: var(--accent); flex-shrink: 0;
+    }
+    .chat-bubble { max-width: 75%; padding: 10px 14px; border-radius: 14px; font-size: 0.95em; }
+    .chat-bubble-user { background: linear-gradient(135deg, #00b4d8, #0077b6); color: #fff; border-radius: 14px 14px 2px 14px; }
+    .chat-bubble-ai { background: var(--panel); border: 1px solid var(--border); border-radius: 14px 14px 14px 2px; }
+    .chat-bubble-ai .chat-badges { margin-top: 8px; display: flex; align-items: center; gap: 8px; font-size: 0.85em; }
   </style>
 </head>
 <body>
@@ -389,6 +402,10 @@
 
     function escapeAttr(text) {
       return text.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+    }
+
+    function escapeHtml(text) {
+      return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     }
 
     function speakButtonHtml(text) {
@@ -914,14 +931,17 @@
       const ex = data.explainability;
       const v = data.verification;
 
-      let html = '<h2>' + data.answer + speakButtonHtml(data.answer) + '</h2>';
+      let html = '<div class="chat-bubbles">' +
+        '<div class="chat-row chat-row-user"><div class="chat-bubble chat-bubble-user">' + escapeHtml(question) + '</div></div>' +
+        '<div class="chat-row chat-row-ai">' +
+        '<div class="chat-avatar">MM</div>' +
+        '<div class="chat-bubble chat-bubble-ai">' +
+        '<div>' + data.answer + speakButtonHtml(data.answer) + '</div>' +
+        '<div class="chat-badges">' +
+        (v.verified ? '<span class="badge verified">Verified</span>' : '<span class="badge unverified">Unverified</span>') +
+        '<span>coverage: ' + Math.round(v.coverage * 100) + '%</span>' +
+        '</div></div></div></div>';
 
-      if (v.verified) {
-        html += '<span class="badge verified">Verified</span> ';
-      } else {
-        html += '<span class="badge unverified">Unverified</span> ';
-      }
-      html += '<span>coverage: ' + Math.round(v.coverage * 100) + '%</span>';
       if (v.unsupported && v.unsupported.length > 0) {
         html += '<ul>' + v.unsupported.map(function(s) { return '<li>' + s + '</li>'; }).join('') + '</ul>';
       }
