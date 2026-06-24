@@ -362,3 +362,31 @@ def tactical_dna(home_telemetry: dict, away_telemetry: dict) -> dict:
         raw_inputs[axis_name] = {"home": home_avg, "away": away_avg, "field": field}
 
     return {"home": home_scores, "away": away_scores, "raw_inputs": raw_inputs}
+
+
+def fatigue_pressure_zones(home_telemetry: dict, away_telemetry: dict) -> dict:
+    """
+    Per-window, per-team zone data for the Fatigue & Pressure tab: a real
+    fatigue_index value (already computed, already tested) plus a
+    min-max-scaled "spread" score from real line_gap_def_mid_m (bigger
+    gap = more stretched/disorganized defensive shape). Team-level only --
+    matchMind has no real per-player tracking data.
+    """
+    home_fatigue = fatigue_index(home_telemetry)["result"]["fatigue_index"]
+    away_fatigue = fatigue_index(away_telemetry)["result"]["fatigue_index"]
+
+    home_gap = home_telemetry["line_gap_def_mid_m"]
+    away_gap = away_telemetry["line_gap_def_mid_m"]
+    all_gaps = home_gap + away_gap
+    lo, hi = min(all_gaps), max(all_gaps)
+
+    def spread(values):
+        if hi == lo:
+            return [50.0] * len(values)
+        return [round((v - lo) / (hi - lo) * 100, 1) for v in values]
+
+    return {
+        "windows": TELEMETRY_DATA["windows"],
+        "home": {"fatigue_index": home_fatigue, "spread": spread(home_gap)},
+        "away": {"fatigue_index": away_fatigue, "spread": spread(away_gap)},
+    }

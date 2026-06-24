@@ -431,3 +431,47 @@ def test_momentum_curve_what_if_event_removal_matches_known_values():
         filtered = [e for e in events if e.get("id") != removed_id]
         final_value = analytics.momentum_summary(analytics.momentum_curve(filtered, weights))["final_value"]
         assert final_value == pytest.approx(expected_final, abs=0.1)
+
+
+def test_fatigue_pressure_zones_spread_zero_variance_gives_fifty():
+    home = {
+        "sprints": [30, 30, 30, 30, 30, 30],
+        "line_gap_def_mid_m": [8.0, 8.0, 8.0, 8.0, 8.0, 8.0],
+        "long_pass_share": [0.20, 0.20, 0.20, 0.20, 0.20, 0.20],
+        "ppda": [10.0, 10.0, 10.0, 10.0, 10.0, 10.0],
+    }
+    away = {
+        "sprints": [30, 30, 30, 30, 30, 30],
+        "line_gap_def_mid_m": [8.0, 8.0, 8.0, 8.0, 8.0, 8.0],
+        "long_pass_share": [0.20, 0.20, 0.20, 0.20, 0.20, 0.20],
+        "ppda": [10.0, 10.0, 10.0, 10.0, 10.0, 10.0],
+    }
+    result = analytics.fatigue_pressure_zones(home, away)
+    assert result["home"]["spread"] == [50.0] * 6
+    assert result["away"]["spread"] == [50.0] * 6
+
+
+def test_fatigue_pressure_zones_returns_windows_list():
+    home = analytics.TELEMETRY_DATA["teams"]["home"]
+    away = analytics.TELEMETRY_DATA["teams"]["away"]
+    result = analytics.fatigue_pressure_zones(home, away)
+    assert result["windows"] == analytics.TELEMETRY_DATA["windows"]
+    assert len(result["windows"]) == 6
+
+
+def test_fatigue_pressure_zones_on_real_fixture_telemetry():
+    home = analytics.TELEMETRY_DATA["teams"]["home"]
+    away = analytics.TELEMETRY_DATA["teams"]["away"]
+    result = analytics.fatigue_pressure_zones(home, away)
+    for team in ("home", "away"):
+        assert len(result[team]["fatigue_index"]) == 6
+        assert len(result[team]["spread"]) == 6
+        for v in result[team]["spread"]:
+            assert 0.0 <= v <= 100.0
+    # Real data: away's line_gap_def_mid_m grows from 8.0 to 11.6 across the
+    # match (their defensive shape stretches as fatigue sets in) -- spread
+    # should rise from window 0 to window 5, not flat or reversed.
+    assert result["away"]["spread"][5] > result["away"]["spread"][0]
+    # Home's fatigue_index values should match calling fatigue_index directly --
+    # this function must reuse it, not duplicate the math.
+    assert result["home"]["fatigue_index"] == analytics.fatigue_index(home)["result"]["fatigue_index"]
