@@ -1,10 +1,6 @@
 from app import components
 
 
-def test_escape_html_escapes_tags_and_amp():
-    assert components.escape_html('<img onerror="x">&') == '&lt;img onerror="x"&gt;&amp;'
-
-
 def test_team_flags_has_argentina_and_france():
     assert "Argentina" in components.TEAM_FLAGS
     assert "France" in components.TEAM_FLAGS

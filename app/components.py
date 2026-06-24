@@ -30,10 +30,6 @@ TEAM_FLAGS = {
 }
 
 
-def escape_html(text: str) -> str:
-    return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-
-
 def escape_attr(text: str) -> str:
     return text.replace("&", "&amp;").replace('"', "&quot;").replace("<", "&lt;").replace(">", "&gt;").replace("'", "&#39;")
 
