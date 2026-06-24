@@ -18,8 +18,6 @@ match_data = {
     ),
 }
 
-st.write(f"## {match_data['home']['name']} {match_data['score']['home']} – {match_data['score']['away']} {match_data['away']['name']}")
-
 tab_overview, tab_moments, tab_ask, tab_debate, tab_history, tab_replay = st.tabs(
     ["Overview", "Moments", "Ask MatchMind", "Debate", "History", "Live Replay"]
 )

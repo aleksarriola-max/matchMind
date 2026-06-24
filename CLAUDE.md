@@ -1,7 +1,7 @@
 # MatchMind — CLAUDE.md
 
 > AI-powered explainability companion for soccer. Built for the IBM Soccer Challenge.
-> Stack: FastAPI · IBM Granite (watsonx.ai / Ollama) · Docling · TF-IDF RAG · vanilla HTML+JS.
+> Stack: Streamlit · IBM Granite (watsonx.ai / Ollama) · Docling · TF-IDF RAG.
 
 ---
 
@@ -9,8 +9,8 @@
 
 ```bash
 pip install -r requirements.txt
-uvicorn backend.main:app --reload
-# -> http://localhost:8000
+streamlit run app/main.py
+# -> http://localhost:8501
 ```
 
 Switch to real Granite (one env var, nothing else changes):
@@ -80,8 +80,19 @@ VERIFY    backend/engines/verifier.py::verify(answer, evidence_texts)
 ## File map
 
 ```
+app/
+  main.py                       Streamlit entry point — builds match_data once, wires the 6 tabs
+  styles.py                     Ported CSS (background blobs, badges, flags, crest, chat bubbles)
+  components.py                 Pure HTML/SVG-string builders (unit-tested): header, flags, event
+                                 rows, glow bars, momentum chart, Decision Lab pitch SVG, incident
+                                 cards, speak buttons
+  overview.py                   Overview tab
+  moments.py                    Moments tab (Decision Lab + text moments + real incident)
+  ask.py                        Ask MatchMind tab (native st.chat_message)
+  debate.py                     Debate (Outrage) tab
+  history.py                    History (Decision Consistency Analyzer) tab
+  replay.py                     Live Replay tab — self-contained st.components.v1.html JS island
 backend/
-  main.py                       FastAPI app — all API routes defined here
   llm/
     adapter.py                  Single generate(system, prompt) interface; three providers
   rag/
@@ -106,11 +117,6 @@ backend/
       laws_of_the_game_excerpt.md  Docling-ingested sample (2 ## sections: Law 11,
                                 Law 12) — generated via `python -m backend.rag.ingest`,
                                 see docs/source_pdfs/laws_of_the_game_excerpt.pdf
-frontend/
-  index.html                    Single-file UI — no build step
-                                Sections: timeline · Decision Lab · Ask MatchMind ·
-                                Explain My Outrage · Decision Consistency · Live Replay
-                                Features: voice narration · colorblind palette · ARIA
 integrations/
   telegram_bot.py               Long-polling Telegram bot; reuses explainer + outrage
 evals/
@@ -126,60 +132,17 @@ docs/
   BUILD_PLAN.md                 3-week roadmap to submission
   DEMO_SCRIPT.md                Demo flow script
   LANGFLOW.md                   LangFlow orchestration guide
-requirements.txt                fastapi · uvicorn · pydantic (docling + ibm-watsonx-ai optional)
+requirements.txt                streamlit (docling + ibm-watsonx-ai optional)
 .env.example                    All env vars with defaults
 ```
 
 ---
 
-## API
+## No HTTP API
 
-| Method | Path | Purpose |
-|--------|------|---------|
-| GET | `/` | Serves `frontend/index.html` |
-| GET | `/api/health` | Provider, model, chunk count |
-| GET | `/api/match` | Match header + events + computed momentum curve |
-| GET | `/api/moment/{id}` | Full moment dossier + computed analytics |
-| POST | `/api/ask` | `{question, persona, language}` -> full explainability payload |
-| POST | `/api/outrage` | `{take, language}` -> steelman + counter + verdict |
-| GET | `/api/analytics` | All six computed models with formulas and inputs |
-| GET | `/api/consistency/{topic}` | Historical comparison (offside\|handball\|goal-line\|penalty) |
-| GET | `/api/consistency` | List available topics |
-
-### POST /api/ask — response schema
-
-```json
-{
-  "answer": "string",
-  "persona": "beginner|analyst|kid|journalist|coach",
-  "language": "English",
-  "moment_id": "offside_27 | null",
-  "verification": {
-    "verified": true,
-    "coverage": 0.94,
-    "checked_sentences": 6,
-    "unsupported": [],
-    "method": "lexical|granite"
-  },
-  "explainability": {
-    "confidence": 0.82,
-    "confidence_basis": "string",
-    "confidence_components": {
-      "evidence_coverage": 0.94,
-      "retrieval_strength_top": 0.16,
-      "decision_class": "measured|judgment|inferred|general",
-      "note": "string"
-    },
-    "sources": [{"title": "Law 11 — Offside offence", "source": "laws_and_tactics.md", "score": 0.16}],
-    "evidence": ["string"],
-    "counterfactual": "string | null",
-    "debate": {"stands": "string", "overturn": "string"} | null,
-    "uncertainty": "string",
-    "lineage": "question -> route[offside_27] -> retrieve[3 chunks] -> ibm/granite-3-3-8b-instruct -> verifier[lexical]"
-  },
-  "llm": {"provider": "watsonx", "model": "ibm/granite-3-3-8b-instruct"}
-}
-```
+There is no FastAPI server or HTTP API in this app. `app/*.py` modules call
+`backend.engines.*` directly as plain Python functions. `integrations/telegram_bot.py`
+and `evals/*.py` already did this too and are unaffected by this change.
 
 ---
 
@@ -219,7 +182,7 @@ Four indicators per 15-min window vs first-half baseline (windows 0-2):
 ### 3. Momentum reconstruction
 Event-weighted, exponentially decayed per 5-min step (decay=0.85).
 Weights in `telemetry.json -> event_weights_for_momentum`.
-`GET /api/match` returns this series; that's what the UI chart renders.
+`analytics.momentum_curve()` returns this series; that's what `main.py` computes once and the Overview chart renders.
 
 ### 4. Counterfactual timing
 `delay_needed_ms = (margin_cm / 100) / attacker_speed_ms * 1000`
@@ -320,7 +283,7 @@ Known blind spots (documented in evals/redteam_results.json):
   "score": {"home": int, "away": int},
   "events": [{"minute": int, "type": "goal|chance|var_review|card|tactical|substitution|pressure",
                "team": "home|away", "id": "string (optional)", "desc": "string"}],
-  "momentum": [{"minute": int, "value": float}],  // static backup; /api/match uses computed version
+  "momentum": [{"minute": int, "value": float}],  // static backup; app/main.py uses computed version
   "moments": {"moment_id": {see below}}
 }
 ```
@@ -416,7 +379,7 @@ not a nice-to-have.
 - Do not add score prediction features — explicitly out of scope.
 - Do not let the system override or replace referee decisions — it explains them.
 - Do not display unverified numbers — every figure must exist in the evidence corpus.
-- Do not change the response schema of `/api/ask` without updating the frontend and
+- Do not change `explainer.ask()`'s return schema without updating `app/ask.py` and
   the Telegram bot — both parse the same payload.
 
 ---
@@ -453,11 +416,10 @@ Run: `python -m evals.run_evals` and `python -m evals.verifier_redteam`
 
 ## Build status
 
-This repository is being built incrementally, phase by phase. See
-`docs/superpowers/specs/` for phase design docs. **Phase 1 (in progress):**
-core demo-mode pipeline — FastAPI backend, TF-IDF retriever, demo LLM
-composer, lexical verifier, routes for `/`, `/api/health`, `/api/match`,
-`/api/moment/{id}`, `/api/ask`. Analytics models, the real frontend,
-consistency analyzer, outrage endpoint, real Granite providers, Docling
-ingestion, evals, and the Telegram bot are later phases — do not assume
-they exist until their phase doc says so.
+This repository was built incrementally, phase by phase. See
+`docs/superpowers/specs/` for phase design docs. The original FastAPI +
+vanilla HTML/JS frontend has been fully replaced by the Streamlit app in
+`app/` (see "No HTTP API" above). Analytics models, the Streamlit UI,
+consistency analyzer, outrage flow, real Granite providers, Docling
+ingestion, evals, and the Telegram bot are all in place — see the file map
+and architecture sections above for what each piece does.
