@@ -345,3 +345,63 @@ def test_referee_profile_on_real_fixture_events():
     assert profile["overturn_rate"] == 0.5
     assert profile["penalties_awarded"] == 0
     assert profile["cautions_issued"] == 0
+
+
+def test_tactical_dna_scales_against_observed_range():
+    home = {
+        "sprints": [40, 40, 40, 40, 40, 40],
+        "line_gap_def_mid_m": [7.0, 7.0, 7.0, 7.0, 7.0, 7.0],
+        "long_pass_share": [0.30, 0.30, 0.30, 0.30, 0.30, 0.30],
+        "ppda": [8.0, 8.0, 8.0, 8.0, 8.0, 8.0],
+    }
+    away = {
+        "sprints": [20, 20, 20, 20, 20, 20],
+        "line_gap_def_mid_m": [11.0, 11.0, 11.0, 11.0, 11.0, 11.0],
+        "long_pass_share": [0.10, 0.10, 0.10, 0.10, 0.10, 0.10],
+        "ppda": [16.0, 16.0, 16.0, 16.0, 16.0, 16.0],
+    }
+    result = analytics.tactical_dna(home, away)
+    # Home has lower PPDA (presses more) -> higher pressing_intensity (inverted axis)
+    assert result["home"]["pressing_intensity"] == 100.0
+    assert result["away"]["pressing_intensity"] == 0.0
+    # Home has higher long_pass_share -> higher directness (not inverted)
+    assert result["home"]["directness"] == 100.0
+    assert result["away"]["directness"] == 0.0
+    # Home has smaller line gap (more compact) -> higher defensive_compactness (inverted)
+    assert result["home"]["defensive_compactness"] == 100.0
+    assert result["away"]["defensive_compactness"] == 0.0
+    # Home has more sprints -> higher transition_speed (not inverted)
+    assert result["home"]["transition_speed"] == 100.0
+    assert result["away"]["transition_speed"] == 0.0
+
+
+def test_tactical_dna_zero_variance_axis_gives_fifty():
+    home = {
+        "sprints": [30, 30, 30, 30, 30, 30],
+        "line_gap_def_mid_m": [8.0, 8.0, 8.0, 8.0, 8.0, 8.0],
+        "long_pass_share": [0.20, 0.20, 0.20, 0.20, 0.20, 0.20],
+        "ppda": [10.0, 10.0, 10.0, 10.0, 10.0, 10.0],
+    }
+    away = {
+        "sprints": [30, 30, 30, 30, 30, 30],
+        "line_gap_def_mid_m": [8.0, 8.0, 8.0, 8.0, 8.0, 8.0],
+        "long_pass_share": [0.20, 0.20, 0.20, 0.20, 0.20, 0.20],
+        "ppda": [10.0, 10.0, 10.0, 10.0, 10.0, 10.0],
+    }
+    result = analytics.tactical_dna(home, away)
+    for axis in ("pressing_intensity", "directness", "defensive_compactness", "transition_speed"):
+        assert result["home"][axis] == 50.0
+        assert result["away"][axis] == 50.0
+
+
+def test_tactical_dna_on_real_fixture_telemetry():
+    home = analytics.TELEMETRY_DATA["teams"]["home"]
+    away = analytics.TELEMETRY_DATA["teams"]["away"]
+    result = analytics.tactical_dna(home, away)
+    for team in ("home", "away"):
+        for axis in ("pressing_intensity", "directness", "defensive_compactness", "transition_speed"):
+            assert 0.0 <= result[team][axis] <= 100.0
+    # Real data: home's PPDA stays low/consistent (8.5-9.5), away's rises to 13.2 --
+    # home presses harder throughout, so home's pressing_intensity score is higher.
+    assert result["home"]["pressing_intensity"] > result["away"]["pressing_intensity"]
+    assert result["raw_inputs"]["pressing_intensity"]["field"] == "ppda"

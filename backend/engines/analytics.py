@@ -321,3 +321,44 @@ def referee_profile(events: list) -> dict:
         "penalties_awarded": sum(1 for e in events if e["type"] == "penalty"),
         "cautions_issued": sum(1 for e in events if e["type"] == "card"),
     }
+
+
+def tactical_dna(home_telemetry: dict, away_telemetry: dict) -> dict:
+    """
+    4-axis "fingerprint" of each team's playing style, computed entirely
+    from real per-window telemetry already used by fatigue_index -- no
+    new data source, no invented league-average benchmark. Each axis is
+    min-max scaled (0-100) against the actual observed range across BOTH
+    teams' windows in THIS match, not an external baseline.
+    """
+    def _scale(home_values, away_values, invert):
+        all_values = home_values + away_values
+        lo, hi = min(all_values), max(all_values)
+        home_avg = sum(home_values) / len(home_values)
+        away_avg = sum(away_values) / len(away_values)
+        if hi == lo:
+            return 50.0, 50.0, home_avg, away_avg
+
+        def scaled(avg):
+            pct = (avg - lo) / (hi - lo)
+            return round((1 - pct) * 100, 1) if invert else round(pct * 100, 1)
+
+        return scaled(home_avg), scaled(away_avg), round(home_avg, 2), round(away_avg, 2)
+
+    axes = [
+        ("pressing_intensity", "ppda", True),
+        ("directness", "long_pass_share", False),
+        ("defensive_compactness", "line_gap_def_mid_m", True),
+        ("transition_speed", "sprints", False),
+    ]
+
+    home_scores, away_scores, raw_inputs = {}, {}, {}
+    for axis_name, field, invert in axes:
+        home_score, away_score, home_avg, away_avg = _scale(
+            home_telemetry[field], away_telemetry[field], invert
+        )
+        home_scores[axis_name] = home_score
+        away_scores[axis_name] = away_score
+        raw_inputs[axis_name] = {"home": home_avg, "away": away_avg, "field": field}
+
+    return {"home": home_scores, "away": away_scores, "raw_inputs": raw_inputs}
