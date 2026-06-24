@@ -82,7 +82,7 @@ Hugo Martínez
 0 cautions issued
 ```
 
-New pure function `app.components.render_referee_card_html(referee_name: str, profile: dict) -> str`, following the same pattern as the existing `render_incident_card_html` — reuses the `.team-card` CSS class (no new CSS needed), unit-tested in `tests/test_components.py` like every other card builder in that file. `app/overview.py` calls it once, passing `match_data["referee"]["name"]` and `analytics.referee_profile(match_data["events"])`.
+New pure function `app.components.render_referee_card_html(referee_name: str, profile: dict) -> str`, following the same pattern as the existing `render_incident_card_html` — reuses the `.team-card` CSS class for its border/panel/accent-stripe styling (no new CSS needed), unit-tested in `tests/test_components.py` like every other card builder in that file. `app/overview.py` calls it once, passing `match_data["referee"]["name"]` and `analytics.referee_profile(match_data["events"])`, rendered as its own full-width block below the two-column team-cards row (not inside that row's flex container) — `.team-card`'s `flex: 1` rule has no effect outside a `.team-cards` flex parent, so this card is full-width by construction, which reads better given its longer text content than the short team-formation strings above it.
 
 Labeled "this match" explicitly in the card's body text, not just implied —
 reinforces the single-match framing decided above.
