@@ -1,6 +1,6 @@
 import streamlit as st
 
-from app import ask, debate, history, moments, overview, styles
+from app import ask, debate, history, moments, overview, replay, styles
 from backend.engines import analytics, explainer
 
 st.set_page_config(page_title="MatchMind", layout="centered")
@@ -40,4 +40,4 @@ with tab_history:
     history.render_history()
 
 with tab_replay:
-    st.write("Live Replay — coming in Task 10")
+    replay.render_replay(match_data)
