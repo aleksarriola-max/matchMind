@@ -1,6 +1,6 @@
 import streamlit as st
 
-from app import ask, debate, history, moments, overview, replay, styles
+from app import ask, debate, history, moments, overview, replay, styles, tactical_dna
 from backend.engines import analytics, explainer
 
 st.set_page_config(page_title="MatchMind", layout="centered")
@@ -22,8 +22,8 @@ match_data["win_confidence"] = analytics.live_win_confidence(
     match_data["events"], match_data["momentum"], match_data["home"]["name"], match_data["away"]["name"],
 )
 
-tab_overview, tab_moments, tab_ask, tab_debate, tab_history, tab_replay = st.tabs(
-    ["Overview", "Moments", "Ask MatchMind", "Debate", "History", "Live Replay"]
+tab_overview, tab_moments, tab_ask, tab_debate, tab_history, tab_replay, tab_tactical_dna = st.tabs(
+    ["Overview", "Moments", "Ask MatchMind", "Debate", "History", "Live Replay", "Tactical DNA"]
 )
 
 with tab_overview:
@@ -43,3 +43,6 @@ with tab_history:
 
 with tab_replay:
     replay.render_replay(match_data)
+
+with tab_tactical_dna:
+    tactical_dna.render_tactical_dna(match_data)
