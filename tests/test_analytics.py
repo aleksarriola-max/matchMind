@@ -405,3 +405,29 @@ def test_tactical_dna_on_real_fixture_telemetry():
     # home presses harder throughout, so home's pressing_intensity score is higher.
     assert result["home"]["pressing_intensity"] > result["away"]["pressing_intensity"]
     assert result["raw_inputs"]["pressing_intensity"]["field"] == "ppda"
+
+
+def test_momentum_curve_what_if_event_removal_matches_known_values():
+    """
+    Regression test for the What If tab's assumption: removing one of the
+    3 toggleable events from the real fixture's event list and recomputing
+    momentum_curve must keep producing these known-correct final values
+    (independently re-derived and verified during code review against the
+    real fixture). If a future change to momentum_curve's formula or
+    weights shifts these, this test -- not just a manual browser check --
+    should catch it.
+    """
+    events = analytics.MATCH_DATA["events"]
+    weights = analytics.TELEMETRY_DATA["event_weights_for_momentum"]
+    actual_final = analytics.momentum_summary(analytics.momentum_curve(events, weights))["final_value"]
+    assert actual_final == pytest.approx(41.0, abs=0.1)
+
+    expected_final_values = {
+        "halftime_shift": 39.8,
+        "sub_58": 39.9,
+        "fatigue_71": 35.6,
+    }
+    for removed_id, expected_final in expected_final_values.items():
+        filtered = [e for e in events if e.get("id") != removed_id]
+        final_value = analytics.momentum_summary(analytics.momentum_curve(filtered, weights))["final_value"]
+        assert final_value == pytest.approx(expected_final, abs=0.1)
