@@ -253,7 +253,8 @@ def live_win_confidence(events: list, momentum_curve: list, home_name: str, away
 
     The time-weighting term means the same goal lead is worth more
     confidence as the match runs out of clock; momentum is a smaller
-    secondary signal.
+    secondary signal. With flat (zero) momentum, a 1-goal lead is ~82%
+    at minute 0 and ~98% near full time.
     """
     points = []
     for m in momentum_curve:
@@ -280,8 +281,10 @@ def live_win_confidence(events: list, momentum_curve: list, home_name: str, away
         pct = round(confidence * 100)
         minutes_left = 90 - minute
 
-        if abs(momentum_oriented) >= 15:
+        if momentum_oriented >= 15:
             momentum_clause = f"plus strongly positive momentum ({momentum_oriented:+.1f}), "
+        elif momentum_oriented <= -15:
+            momentum_clause = f"despite the opponent's strong momentum ({momentum_oriented:+.1f}), "
         else:
             momentum_clause = ""
 

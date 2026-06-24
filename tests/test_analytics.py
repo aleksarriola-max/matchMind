@@ -293,3 +293,7 @@ def test_live_win_confidence_momentum_opposes_leader():
     assert point_opposing["confidence"] < confidence_flat_at_65
     # Explanation should still mention momentum (>=15 threshold triggered, abs(-25.0) >= 15)
     assert "momentum" in point_opposing["explanation"].lower()
+    # Wording must not contradict the sign: momentum opposing the leader must
+    # never be described as "positive" for the leader.
+    assert "positive" not in point_opposing["explanation"].lower()
+    assert "despite" in point_opposing["explanation"].lower()

@@ -29,7 +29,7 @@ def live_win_confidence(events: list, momentum_curve: list, home_name: str, away
         confidence = sigmoid(raw)
 
     The (1.5 + 2.5 * minute/90) term means the same goal lead is worth more
-    confidence as time runs out (~65% for a 1-goal lead at minute 0, ~93%+
+    confidence as time runs out (~82% for a 1-goal lead at minute 0, ~98%
     near full time). Momentum is a smaller secondary signal.
     """
 ```
