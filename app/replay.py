@@ -103,7 +103,19 @@ def render_replay(match_data: dict) -> None:
           setTimeout(function() {{ if (bannerId === candidate.id) banner.innerHTML = ''; }}, 5000);
         }}
 
+        function isHidden() {{
+          try {{
+            var el = window.frameElement;
+            if (!el) return false; // can't determine, assume visible
+            var rect = el.getBoundingClientRect();
+            return rect.width === 0 || rect.height === 0 || getComputedStyle(el).visibility === 'hidden';
+          }} catch (e) {{
+            return false; // cross-origin or blocked, assume visible
+          }}
+        }}
+
         function tick() {{
+          if (isHidden()) {{ pause(); return; }}
           minute += 1;
           if (minute >= 90) {{ minute = 90; pause(); renderState(); return; }}
           renderState();
