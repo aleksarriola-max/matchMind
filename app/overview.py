@@ -1,6 +1,7 @@
 import streamlit as st
 
 from app import components
+from backend.engines import analytics
 
 
 def render_overview(match_data: dict) -> None:
@@ -14,6 +15,12 @@ def render_overview(match_data: dict) -> None:
         )
     cards_html += "</div>"
     st.markdown(cards_html, unsafe_allow_html=True)
+
+    profile = analytics.referee_profile(match_data["events"])
+    st.markdown(
+        components.render_referee_card_html(match_data["referee"]["name"], profile),
+        unsafe_allow_html=True,
+    )
 
     st.markdown(
         components.render_momentum_chart_html("<h3>Momentum</h3>", match_data),

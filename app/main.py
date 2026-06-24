@@ -12,6 +12,7 @@ match_data = {
     "home": explainer.MATCH_DATA["home"],
     "away": explainer.MATCH_DATA["away"],
     "score": explainer.MATCH_DATA["score"],
+    "referee": explainer.MATCH_DATA["referee"],
     "events": explainer.MATCH_DATA["events"],
     "momentum": analytics.momentum_curve(
         explainer.MATCH_DATA["events"], analytics.TELEMETRY_DATA["event_weights_for_momentum"]
