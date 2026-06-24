@@ -336,12 +336,12 @@ def render_tactical_dna_radar_html(
     away_poly = polygon_points(away_scores)
 
     return (
-        '<svg viewBox="0 0 220 230" class="momentum-chart-svg">'
+        '<svg viewBox="-60 -10 340 270" class="momentum-chart-svg">'
         f"{grid_circles}"
         f'<polygon points="{home_poly}" fill="{home_color}" fill-opacity="0.3" stroke="{home_color}" stroke-width="1.5"/>'
         f'<polygon points="{away_poly}" fill="{away_color}" fill-opacity="0.3" stroke="{away_color}" stroke-width="1.5"/>'
         f"{labels}"
-        f'<text x="10" y="215" fill="{home_color}" font-size="10">{home_name}</text>'
-        f'<text x="120" y="215" fill="{away_color}" font-size="10">{away_name}</text>'
+        f'<text x="-50" y="252" fill="{home_color}" font-size="10">{home_name}</text>'
+        f'<text x="200" y="252" fill="{away_color}" font-size="10">{away_name}</text>'
         "</svg>"
     )
