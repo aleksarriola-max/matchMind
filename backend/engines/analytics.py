@@ -237,3 +237,64 @@ def momentum_summary(curve: list) -> dict:
         "swing": round(max(values) - min(values), 1),
         "dominant_team": "home" if final_value > 0 else ("away" if final_value < 0 else "even"),
     }
+
+
+def live_win_confidence(events: list, momentum_curve: list, home_name: str, away_name: str) -> list:
+    """
+    One point per momentum_curve minute. Confidence is always P(current
+    leader wins) -- 0.5 when scores are level (no leader).
+
+    Illustrative formula (same convention as offside_probability/fatigue_index):
+        goal_diff = |home_goals - away_goals| at this minute
+        momentum_oriented = momentum value, sign-flipped to align with
+            whichever team currently leads (positive = leader's favor)
+        raw = goal_diff * (1.5 + 2.5 * minute / 90) + 0.05 * momentum_oriented
+        confidence = sigmoid(raw)
+
+    The time-weighting term means the same goal lead is worth more
+    confidence as the match runs out of clock; momentum is a smaller
+    secondary signal.
+    """
+    points = []
+    for m in momentum_curve:
+        minute = m["minute"]
+        home_goals = sum(1 for e in events if e["type"] == "goal" and e["team"] == "home" and e["minute"] <= minute)
+        away_goals = sum(1 for e in events if e["type"] == "goal" and e["team"] == "away" and e["minute"] <= minute)
+
+        if home_goals == away_goals:
+            points.append({
+                "minute": minute,
+                "leader": None,
+                "confidence": 0.5,
+                "explanation": f"Scores level at {home_goals}-{away_goals} — no clear favorite yet.",
+            })
+            continue
+
+        leader = "home" if home_goals > away_goals else "away"
+        leader_name = home_name if leader == "home" else away_name
+        goal_diff = abs(home_goals - away_goals)
+        momentum_oriented = m["value"] if leader == "home" else -m["value"]
+
+        raw = goal_diff * (1.5 + 2.5 * minute / 90) + 0.05 * momentum_oriented
+        confidence = 1 / (1 + math.exp(-raw))
+        pct = round(confidence * 100)
+        minutes_left = 90 - minute
+
+        if abs(momentum_oriented) >= 15:
+            momentum_clause = f"plus strongly positive momentum ({momentum_oriented:+.1f}), "
+        else:
+            momentum_clause = ""
+
+        explanation = (
+            f"{leader_name}'s {goal_diff}-goal lead with {minutes_left} minutes left, "
+            f"{momentum_clause}gives an estimated {pct}% chance of winning."
+        )
+
+        points.append({
+            "minute": minute,
+            "leader": leader,
+            "confidence": round(confidence, 4),
+            "explanation": explanation,
+        })
+
+    return points

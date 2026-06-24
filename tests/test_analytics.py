@@ -175,3 +175,72 @@ def test_momentum_summary_for_demo_curve():
     assert summary["final_value"] == pytest.approx(41.0, abs=0.1)
     assert summary["swing"] == pytest.approx(77.2, abs=0.1)
     assert summary["dominant_team"] == "home"
+
+
+def _confidence_events_one_goal_lead():
+    return [{"minute": 10, "type": "goal", "team": "home", "desc": "Home scores"}]
+
+
+def _confidence_momentum_flat():
+    return [{"minute": m, "value": 0.0} for m in range(0, 91, 5)]
+
+
+def test_live_win_confidence_tied_score_is_neutral():
+    events = []
+    momentum = _confidence_momentum_flat()
+    curve = analytics.live_win_confidence(events, momentum, "Argentina", "France")
+    for point in curve:
+        assert point["leader"] is None
+        assert point["confidence"] == 0.5
+        assert "level" in point["explanation"].lower()
+
+
+def test_live_win_confidence_rises_with_time_for_same_lead():
+    events = _confidence_events_one_goal_lead()
+    momentum = _confidence_momentum_flat()
+    curve = analytics.live_win_confidence(events, momentum, "Argentina", "France")
+    early = next(p for p in curve if p["minute"] == 10)
+    late = next(p for p in curve if p["minute"] == 85)
+    assert early["leader"] == "home"
+    assert late["leader"] == "home"
+    assert late["confidence"] > early["confidence"]
+
+
+def test_live_win_confidence_two_goal_lead_beats_one_goal_lead():
+    momentum = _confidence_momentum_flat()
+    one_goal = analytics.live_win_confidence(
+        [{"minute": 10, "type": "goal", "team": "home", "desc": "x"}],
+        momentum, "Argentina", "France",
+    )
+    two_goal = analytics.live_win_confidence(
+        [
+            {"minute": 10, "type": "goal", "team": "home", "desc": "x"},
+            {"minute": 20, "type": "goal", "team": "home", "desc": "y"},
+        ],
+        momentum, "Argentina", "France",
+    )
+    one_at_50 = next(p for p in one_goal if p["minute"] == 50)
+    two_at_50 = next(p for p in two_goal if p["minute"] == 50)
+    assert two_at_50["confidence"] > one_at_50["confidence"]
+
+
+def test_live_win_confidence_leader_changes_on_comeback():
+    events = [
+        {"minute": 10, "type": "goal", "team": "home", "desc": "Home scores"},
+        {"minute": 40, "type": "goal", "team": "away", "desc": "Away equalises"},
+        {"minute": 41, "type": "goal", "team": "away", "desc": "Away takes the lead"},
+    ]
+    momentum = _confidence_momentum_flat()
+    curve = analytics.live_win_confidence(events, momentum, "Argentina", "France")
+    at_20 = next(p for p in curve if p["minute"] == 20)
+    at_45 = next(p for p in curve if p["minute"] == 45)
+    assert at_20["leader"] == "home"
+    assert at_45["leader"] == "away"
+
+
+def test_live_win_confidence_explanation_mentions_leader_name():
+    events = _confidence_events_one_goal_lead()
+    momentum = _confidence_momentum_flat()
+    curve = analytics.live_win_confidence(events, momentum, "Argentina", "France")
+    at_50 = next(p for p in curve if p["minute"] == 50)
+    assert "Argentina" in at_50["explanation"]
