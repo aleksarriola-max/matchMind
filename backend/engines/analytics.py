@@ -301,3 +301,23 @@ def live_win_confidence(events: list, momentum_curve: list, home_name: str, away
         })
 
     return points
+
+
+def referee_profile(events: list) -> dict:
+    """
+    Single-match officiating summary, computed purely from this match's own
+    events -- not a cross-match behavioral tendency (matchMind has no real
+    multi-match referee history to compute one from).
+    """
+    var_reviews = [e for e in events if e["type"] == "var_review"]
+    overturned = sum(1 for e in var_reviews if e.get("outcome") == "overturned")
+    upheld = sum(1 for e in var_reviews if e.get("outcome") == "upheld")
+    return {
+        "var_reviews_triggered": len(var_reviews),
+        "overturned_count": overturned,
+        "upheld_count": upheld,
+        "overturn_rate": round(overturned / len(var_reviews), 2) if var_reviews else None,
+        "penalty_appeals": sum(1 for e in events if "penalty" in e["desc"].lower()),
+        "penalties_awarded": sum(1 for e in events if e["type"] == "penalty"),
+        "cautions_issued": sum(1 for e in events if e["type"] == "card"),
+    }

@@ -13,11 +13,12 @@
     "formation_start": "4-2-3-1",
     "formation_end": "4-2-3-1"
   },
+  "referee": {"name": "Hugo Martínez"},
   "score": {"home": 2, "away": 1},
   "events": [
     {"minute": 19, "type": "goal", "team": "away", "desc": "France open the scoring with a counter-attack finish to make it 0-1."},
-    {"minute": 27, "type": "var_review", "team": "home", "id": "offside_27", "desc": "Argentina's goal is disallowed after a VAR review for offside."},
-    {"minute": 38, "type": "var_review", "team": "away", "id": "handball_38", "desc": "France's penalty appeal for handball is rejected."},
+    {"minute": 27, "type": "var_review", "team": "home", "id": "offside_27", "outcome": "overturned", "desc": "Argentina's goal is disallowed after a VAR review for offside."},
+    {"minute": 38, "type": "var_review", "team": "away", "id": "handball_38", "outcome": "upheld", "desc": "France's penalty appeal for handball is rejected."},
     {"minute": 46, "type": "tactical", "team": "home", "id": "halftime_shift", "desc": "Argentina switch from a 4-3-3 to a 4-4-2 at the start of the second half."},
     {"minute": 58, "type": "substitution", "team": "home", "id": "sub_58", "desc": "Argentina bring on a fresh right winger."},
     {"minute": 63, "type": "goal", "team": "home", "id": "goal_home_1", "desc": "Argentina equalise to make it 1-1 from a left-side overload."},

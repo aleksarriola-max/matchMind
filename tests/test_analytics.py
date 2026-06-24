@@ -297,3 +297,51 @@ def test_live_win_confidence_momentum_opposes_leader():
     # never be described as "positive" for the leader.
     assert "positive" not in point_opposing["explanation"].lower()
     assert "despite" in point_opposing["explanation"].lower()
+
+
+def test_referee_profile_counts_var_reviews_and_overturn_rate():
+    events = [
+        {"minute": 27, "type": "var_review", "team": "home", "outcome": "overturned", "desc": "x"},
+        {"minute": 38, "type": "var_review", "team": "away", "outcome": "upheld", "desc": "y"},
+    ]
+    profile = analytics.referee_profile(events)
+    assert profile["var_reviews_triggered"] == 2
+    assert profile["overturned_count"] == 1
+    assert profile["upheld_count"] == 1
+    assert profile["overturn_rate"] == 0.5
+
+
+def test_referee_profile_overturn_rate_is_none_without_var_reviews():
+    events = [{"minute": 19, "type": "goal", "team": "home", "desc": "x"}]
+    profile = analytics.referee_profile(events)
+    assert profile["var_reviews_triggered"] == 0
+    assert profile["overturn_rate"] is None
+
+
+def test_referee_profile_counts_penalty_appeals_from_descriptions():
+    events = [
+        {"minute": 38, "type": "var_review", "team": "away", "outcome": "upheld", "desc": "France's penalty appeal for handball is rejected."},
+    ]
+    profile = analytics.referee_profile(events)
+    assert profile["penalty_appeals"] == 1
+    assert profile["penalties_awarded"] == 0
+
+
+def test_referee_profile_counts_cautions_by_exact_type():
+    events = [
+        {"minute": 50, "type": "card", "team": "home", "desc": "Yellow card shown."},
+        {"minute": 60, "type": "goal", "team": "away", "desc": "Goal scored."},
+    ]
+    profile = analytics.referee_profile(events)
+    assert profile["cautions_issued"] == 1
+
+
+def test_referee_profile_on_real_fixture_events():
+    from backend.engines import explainer
+    profile = analytics.referee_profile(explainer.MATCH_DATA["events"])
+    assert profile["var_reviews_triggered"] == 2
+    assert profile["overturned_count"] == 1
+    assert profile["upheld_count"] == 1
+    assert profile["overturn_rate"] == 0.5
+    assert profile["penalties_awarded"] == 0
+    assert profile["cautions_issued"] == 0
