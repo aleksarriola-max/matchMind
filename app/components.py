@@ -345,3 +345,43 @@ def render_tactical_dna_radar_html(
         f'<text x="200" y="252" fill="{away_color}" font-size="10">{away_name}</text>'
         "</svg>"
     )
+
+
+def _blend_toward_red(hex_color: str, intensity: float) -> str:
+    """intensity is expected roughly in [0, 100]; clamped so an out-of-range
+    fatigue_index value (it can run slightly negative, e.g. -2.0, when a
+    team is fresher than their own first-half baseline) never produces an
+    invalid blend ratio."""
+    ratio = max(0.0, min(1.0, intensity / 100))
+    r = int(hex_color[1:3], 16)
+    g = int(hex_color[3:5], 16)
+    b = int(hex_color[5:7], 16)
+    blend = lambda c, target: round(c + (target - c) * ratio)
+    return f"rgb({blend(r, 204)},{blend(g, 51)},{blend(b, 51)})"
+
+
+def render_fatigue_zone_pitch_html(
+    home_name: str, away_name: str, home_color: str, away_color: str,
+    home_fatigue: float, home_spread: float, away_fatigue: float, away_spread: float,
+) -> str:
+    home_radius = 8 + home_spread / 100 * 10
+    away_radius = 8 + away_spread / 100 * 10
+    home_fill = _blend_toward_red(home_color, home_fatigue)
+    away_fill = _blend_toward_red(away_color, away_fatigue)
+
+    return (
+        '<svg viewBox="-2 -2 104 72" class="pitch-svg">'
+        '<rect x="-2" y="-2" width="104" height="72" fill="#1a6e38"/>'
+        '<g stroke="#eaf5ee" stroke-width="0.35" fill="none" opacity="0.9">'
+        '<rect x="0" y="0" width="100" height="68"/>'
+        '<line x1="50" y1="0" x2="50" y2="68"/>'
+        '<circle cx="50" cy="34" r="8.7"/>'
+        "</g>"
+        f'<ellipse cx="30" cy="34" rx="{home_radius:.1f}" ry="{home_radius:.1f}" '
+        f'fill="{home_fill}" fill-opacity="0.6" stroke="{home_color}" stroke-width="0.5"/>'
+        f'<ellipse cx="70" cy="34" rx="{away_radius:.1f}" ry="{away_radius:.1f}" '
+        f'fill="{away_fill}" fill-opacity="0.6" stroke="{away_color}" stroke-width="0.5"/>'
+        f'<text x="30" y="60" fill="{home_color}" font-size="4" text-anchor="middle">{home_name}</text>'
+        f'<text x="70" y="60" fill="{away_color}" font-size="4" text-anchor="middle">{away_name}</text>'
+        "</svg>"
+    )

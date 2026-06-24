@@ -203,3 +203,38 @@ def test_render_tactical_dna_radar_html_uses_team_colors():
     )
     assert "#75AADB" in html
     assert "#0055A4" in html
+
+
+def test_render_fatigue_zone_pitch_html_contains_svg_and_team_names():
+    html = components.render_fatigue_zone_pitch_html(
+        "Argentina", "France", "#75AADB", "#0055A4",
+        home_fatigue=-1.5, home_spread=9.8, away_fatigue=54.6, away_spread=100.0,
+    )
+    assert "<svg" in html
+    assert "<ellipse" in html
+    assert "Argentina" in html
+    assert "France" in html
+
+
+def test_render_fatigue_zone_pitch_html_larger_spread_gives_larger_radius():
+    small_spread_html = components.render_fatigue_zone_pitch_html(
+        "Argentina", "France", "#75AADB", "#0055A4",
+        home_fatigue=0.0, home_spread=0.0, away_fatigue=0.0, away_spread=0.0,
+    )
+    large_spread_html = components.render_fatigue_zone_pitch_html(
+        "Argentina", "France", "#75AADB", "#0055A4",
+        home_fatigue=0.0, home_spread=100.0, away_fatigue=0.0, away_spread=100.0,
+    )
+    assert small_spread_html != large_spread_html
+
+
+def test_render_fatigue_zone_pitch_html_high_fatigue_blends_toward_red():
+    low_fatigue_html = components.render_fatigue_zone_pitch_html(
+        "Argentina", "France", "#75AADB", "#0055A4",
+        home_fatigue=0.0, home_spread=50.0, away_fatigue=0.0, away_spread=50.0,
+    )
+    high_fatigue_html = components.render_fatigue_zone_pitch_html(
+        "Argentina", "France", "#75AADB", "#0055A4",
+        home_fatigue=0.0, home_spread=50.0, away_fatigue=60.0, away_spread=50.0,
+    )
+    assert low_fatigue_html != high_fatigue_html
