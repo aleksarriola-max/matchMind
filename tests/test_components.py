@@ -179,3 +179,27 @@ def test_render_referee_card_html_handles_no_var_reviews():
     }
     html = components.render_referee_card_html("Hugo Martínez", profile)
     assert "0 VAR reviews" in html
+
+
+def test_render_tactical_dna_radar_html_contains_svg_and_team_names():
+    home_scores = {"pressing_intensity": 87.9, "directness": 6.7, "defensive_compactness": 95.5, "transition_speed": 77.8}
+    away_scores = {"pressing_intensity": 54.6, "directness": 40.0, "defensive_compactness": 52.0, "transition_speed": 53.7}
+    html = components.render_tactical_dna_radar_html(
+        "Argentina", "France", home_scores, away_scores, "#75AADB", "#0055A4"
+    )
+    assert "<svg" in html
+    assert "polygon" in html
+    assert "Pressing Intensity" in html or "pressing intensity" in html.lower()
+    assert "Directness" in html or "directness" in html.lower()
+    assert "Defensive Compactness" in html or "defensive compactness" in html.lower()
+    assert "Transition Speed" in html or "transition speed" in html.lower()
+
+
+def test_render_tactical_dna_radar_html_uses_team_colors():
+    home_scores = {"pressing_intensity": 50.0, "directness": 50.0, "defensive_compactness": 50.0, "transition_speed": 50.0}
+    away_scores = {"pressing_intensity": 50.0, "directness": 50.0, "defensive_compactness": 50.0, "transition_speed": 50.0}
+    html = components.render_tactical_dna_radar_html(
+        "Argentina", "France", home_scores, away_scores, "#75AADB", "#0055A4"
+    )
+    assert "#75AADB" in html
+    assert "#0055A4" in html

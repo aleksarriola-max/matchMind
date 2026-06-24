@@ -299,3 +299,49 @@ def render_referee_card_html(referee_name: str, profile: dict) -> str:
         f'<div>{profile["cautions_issued"]} cautions issued</div>'
         "</div>"
     )
+
+
+def render_tactical_dna_radar_html(
+    home_name: str, away_name: str, home_scores: dict, away_scores: dict,
+    home_color: str, away_color: str,
+) -> str:
+    axis_order = ["pressing_intensity", "directness", "defensive_compactness", "transition_speed"]
+    axis_labels = {
+        "pressing_intensity": "Pressing Intensity",
+        "directness": "Directness",
+        "defensive_compactness": "Defensive Compactness",
+        "transition_speed": "Transition Speed",
+    }
+    cx, cy, radius = 110, 110, 90
+
+    def point(i, score):
+        angle = math.radians(-90 + i * 90)
+        r = radius * (score / 100)
+        return cx + r * math.cos(angle), cy + r * math.sin(angle)
+
+    def polygon_points(scores):
+        return " ".join(f"{x:.1f},{y:.1f}" for x, y in (point(i, scores[axis]) for i, axis in enumerate(axis_order)))
+
+    grid_circles = "".join(
+        f'<circle cx="{cx}" cy="{cy}" r="{radius * pct}" fill="none" stroke="#333" stroke-width="0.5"/>'
+        for pct in (0.25, 0.5, 0.75, 1.0)
+    )
+
+    labels = ""
+    for i, axis in enumerate(axis_order):
+        lx, ly = point(i, 118)
+        labels += f'<text x="{lx:.1f}" y="{ly:.1f}" fill="#999" font-size="9" text-anchor="middle">{axis_labels[axis]}</text>'
+
+    home_poly = polygon_points(home_scores)
+    away_poly = polygon_points(away_scores)
+
+    return (
+        '<svg viewBox="0 0 220 230" class="momentum-chart-svg">'
+        f"{grid_circles}"
+        f'<polygon points="{home_poly}" fill="{home_color}" fill-opacity="0.3" stroke="{home_color}" stroke-width="1.5"/>'
+        f'<polygon points="{away_poly}" fill="{away_color}" fill-opacity="0.3" stroke="{away_color}" stroke-width="1.5"/>'
+        f"{labels}"
+        f'<text x="10" y="215" fill="{home_color}" font-size="10">{home_name}</text>'
+        f'<text x="120" y="215" fill="{away_color}" font-size="10">{away_name}</text>'
+        "</svg>"
+    )
