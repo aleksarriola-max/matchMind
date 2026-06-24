@@ -1,4 +1,14 @@
+import sys
+from pathlib import Path
+
 import streamlit as st
+
+# Streamlit invokes this file as a standalone script, so the interpreter
+# only puts this file's own directory (app/) on sys.path by default --
+# the repo root must be added explicitly for "from app import ..." and
+# "from backend... import ..." below to resolve regardless of how/from
+# where this script is launched.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from app import ask, debate, fatigue_pressure, history, moments, overview, replay, styles, tactical_dna, what_if
 from backend.engines import analytics, explainer
