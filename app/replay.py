@@ -10,6 +10,7 @@ def render_replay(match_data: dict) -> None:
             "away": match_data["away"],
             "events": match_data["events"],
             "momentum": match_data["momentum"],
+            "win_confidence": match_data["win_confidence"],
         }
     )
 
@@ -32,6 +33,11 @@ def render_replay(match_data: dict) -> None:
       .event-row .minute {{ color: #00e0ff; min-width: 3em; font-weight: 700; }}
       .event-badge {{ display: inline-block; font-size: 0.75em; text-transform: uppercase; background: #2a2a2a; color: #999; border-radius: 4px; padding: 2px 6px; }}
       .momentum-svg {{ width: 100%; display: block; background: #161616; border-radius: 6px; padding: 8px; box-sizing: border-box; }}
+      .confidence-wrap {{ margin-bottom: 14px; }}
+      .confidence-label {{ display: flex; justify-content: space-between; font-size: 0.85em; margin-bottom: 4px; }}
+      .confidence-bar {{ background: #1c1c24; border-radius: 6px; height: 10px; overflow: hidden; }}
+      .confidence-bar .fill {{ height: 100%; background: #00e0ff; transition: width 0.4s ease-out; }}
+      .confidence-explanation {{ color: #999; font-size: 0.8em; margin-top: 4px; }}
     </style>
     </head>
     <body>
@@ -39,6 +45,7 @@ def render_replay(match_data: dict) -> None:
         <div class="replay-minute" id="replay-minute">0<span class="tick">'</span></div>
         <div class="replay-score" id="replay-score"></div>
       </div>
+      <div class="confidence-wrap" id="confidence-wrap"></div>
       <div class="replay-controls">
         <button id="replay-play-pause">▶ Play</button>
         <button data-speed="1" class="speed-btn on">1x</button>
@@ -68,6 +75,22 @@ def render_replay(match_data: dict) -> None:
             '<polyline points="' + points + '" fill="none" stroke="' + matchData.home.color + '" stroke-width="2.5"/>';
         }}
 
+        function nearestConfidence(minute) {{
+          var points = matchData.win_confidence.filter(function(p) {{ return p.minute <= minute; }});
+          if (points.length === 0) return matchData.win_confidence[0];
+          return points[points.length - 1];
+        }}
+
+        function renderConfidence() {{
+          var point = nearestConfidence(minute);
+          var pct = Math.round(point.confidence * 100);
+          var leaderName = point.leader === 'home' ? matchData.home.name : point.leader === 'away' ? matchData.away.name : 'Neither side';
+          document.getElementById('confidence-wrap').innerHTML =
+            '<div class="confidence-label"><span>' + leaderName + ' to win</span><span>' + pct + '%</span></div>' +
+            '<div class="confidence-bar"><div class="fill" style="width:' + pct + '%"></div></div>' +
+            '<div class="confidence-explanation">' + point.explanation + '</div>';
+        }}
+
         function renderState() {{
           document.getElementById('replay-seek').value = minute;
           document.getElementById('replay-minute').innerHTML = minute >= 90 ? 'Full Time' : minute + '<span class="tick">\\'</span>';
@@ -77,6 +100,7 @@ def render_replay(match_data: dict) -> None:
           }});
           document.getElementById('replay-score').textContent = matchData.home.name + ' ' + homeGoals + ' – ' + awayGoals + ' ' + matchData.away.name;
           drawMomentum();
+          renderConfidence();
           var past = matchData.events.filter(function(e) {{ return e.minute <= minute; }}).slice().reverse();
           document.getElementById('replay-ticker').innerHTML = past.map(function(e) {{
             return '<div class="event-row"><span>' + (EVENT_ICONS[e.type] || '•') + '</span>' +
