@@ -244,3 +244,52 @@ def test_live_win_confidence_explanation_mentions_leader_name():
     curve = analytics.live_win_confidence(events, momentum, "Argentina", "France")
     at_50 = next(p for p in curve if p["minute"] == 50)
     assert "Argentina" in at_50["explanation"]
+
+
+def test_live_win_confidence_momentum_favors_leader():
+    """
+    When home leads by a goal and momentum is strongly positive for home (>=15),
+    confidence should be higher than the same scenario with flat momentum,
+    and the explanation should contain "momentum".
+    """
+    events = [{"minute": 10, "type": "goal", "team": "home", "desc": "Home scores"}]
+
+    # Flat momentum case
+    momentum_flat = _confidence_momentum_flat()
+    curve_flat = analytics.live_win_confidence(events, momentum_flat, "Argentina", "France")
+    confidence_flat_at_65 = next(p for p in curve_flat if p["minute"] == 65)["confidence"]
+
+    # Momentum favors home (positive for home) at minute 65
+    momentum_favorable = [{"minute": m, "value": 25.0 if m == 65 else 0.0} for m in range(0, 91, 5)]
+    curve_favorable = analytics.live_win_confidence(events, momentum_favorable, "Argentina", "France")
+    point_favorable = next(p for p in curve_favorable if p["minute"] == 65)
+
+    # Confidence should be higher when momentum favors the leader
+    assert point_favorable["confidence"] > confidence_flat_at_65
+    # Explanation should mention momentum (>=15 threshold triggered)
+    assert "momentum" in point_favorable["explanation"].lower()
+
+
+def test_live_win_confidence_momentum_opposes_leader():
+    """
+    When home leads by a goal but momentum is strongly positive for away (<=−15 for home),
+    confidence should be lower than the same scenario with flat momentum.
+    This proves the sign-flip correctly applies a negative adjustment when
+    momentum opposes the leader.
+    """
+    events = [{"minute": 10, "type": "goal", "team": "home", "desc": "Home scores"}]
+
+    # Flat momentum case
+    momentum_flat = _confidence_momentum_flat()
+    curve_flat = analytics.live_win_confidence(events, momentum_flat, "Argentina", "France")
+    confidence_flat_at_65 = next(p for p in curve_flat if p["minute"] == 65)["confidence"]
+
+    # Momentum favors away (negative for home) at minute 65
+    momentum_opposing = [{"minute": m, "value": -25.0 if m == 65 else 0.0} for m in range(0, 91, 5)]
+    curve_opposing = analytics.live_win_confidence(events, momentum_opposing, "Argentina", "France")
+    point_opposing = next(p for p in curve_opposing if p["minute"] == 65)
+
+    # Confidence should be lower when momentum opposes the leader
+    assert point_opposing["confidence"] < confidence_flat_at_65
+    # Explanation should still mention momentum (>=15 threshold triggered, abs(-25.0) >= 15)
+    assert "momentum" in point_opposing["explanation"].lower()
