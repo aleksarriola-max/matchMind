@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components_v1
 
 from app import components
 from backend.engines.explainer import compose_demo, explain, ground, route
@@ -44,6 +45,7 @@ def render_ask() -> None:
 def _render_answer(entry: dict) -> None:
     v, ex = entry["verification"], entry["explainability"]
     st.write(entry["answer"])
+    components_v1.html(components.speak_button_html(entry["answer"]), height=40)
     badge = (
         '<span class="badge verified">Verified</span>' if v["verified"]
         else '<span class="badge unverified">Unverified</span>'

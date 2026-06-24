@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components_v1
 
 from app import components
 from backend.engines import analytics, explainer, real_incident
@@ -56,6 +57,9 @@ def _render_text_moment(moment: dict, match_data: dict) -> None:
     if moment.get("law"):
         st.markdown(f'<div class="law-badge">{moment["law"]}</div>', unsafe_allow_html=True)
     st.markdown(f'<p class="decision">{moment["decision"]}</p>', unsafe_allow_html=True)
+    components_v1.html(
+        components.speak_button_html(moment["decision"] + ". " + moment["summary"]), height=40
+    )
     st.markdown(components.render_glow_bar_html("Confidence", moment["confidence"], "var(--accent)"), unsafe_allow_html=True)
     st.write(moment["summary"])
     st.markdown("### Evidence")
@@ -82,7 +86,8 @@ def _render_text_moment(moment: dict, match_data: dict) -> None:
                 "Peak window": [home["peak_window"], away["peak_window"]],
             }
         )
-        st.write(f"More fatigued by full-time: {cmp['more_fatigued_team']} (diff {cmp['difference'][5]} pts)")
+        more_fatigued_name = match_data[cmp["more_fatigued_team"]]["name"]
+        st.write(f"More fatigued by full-time: {more_fatigued_name} (diff {cmp['difference'][5]} pts)")
 
 
 def _render_real_incident(match_data: dict) -> None:
@@ -150,6 +155,9 @@ def render_moments(match_data: dict) -> None:
         st.markdown(
             components.render_decision_lab_pitch_html(moment, match_data, show_sightline, show_uncertainty_band),
             unsafe_allow_html=True,
+        )
+        components_v1.html(
+            components.speak_button_html(moment["decision"] + ". " + moment["summary"]), height=40
         )
         if moment.get("counterfactual"):
             frames = moment["analytics"]["counterfactual_timing"]["result"]["frames_at_50fps"]

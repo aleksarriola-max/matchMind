@@ -1,17 +1,19 @@
 import streamlit as st
+import streamlit.components.v1 as components_v1
 
 from app import components
 from backend.engines import consistency
 
 TOPICS = ["offside", "handball", "goal-line", "penalty"]
-TOPIC_LABELS = {"offside": "🚩 offside", "handball": "✅ handball", "goal-line": "📏 goal-line", "penalty": "⚖️ penalty"}
 
 
 def render_history() -> None:
     st.markdown("## Decision Consistency Analyzer")
     st.write("Compare today's call with real World Cup history.")
 
-    topic = st.radio("Topic", TOPICS, format_func=lambda t: TOPIC_LABELS[t], key="history_topic")
+    topic = st.radio(
+        "Topic", TOPICS, format_func=lambda t: f"{components.TOPIC_ICONS[t]} {t}", key="history_topic"
+    )
     data = consistency.compare(topic)
 
     if data["today"]:
@@ -26,3 +28,7 @@ def render_history() -> None:
 
     for incident in data["historical_incidents"]:
         st.markdown(components.render_incident_card_html(incident), unsafe_allow_html=True)
+        narration = incident["title"] + ". " + incident["description"] + " " + incident["decision"]
+        if incident.get("comparison_to_today"):
+            narration += " " + incident["comparison_to_today"]
+        components_v1.html(components.speak_button_html(narration), height=40)

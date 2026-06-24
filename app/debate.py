@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components_v1
 
 from app import components
 from backend.engines.explainer import outrage
@@ -27,6 +28,15 @@ def render_debate() -> None:
 
     st.markdown("### What actually happened")
     st.write(result["summary"])
+
+    if result["steelman"]:
+        narration = (
+            result["summary"] + " Your side: " + result["steelman"]
+            + " The counter-case: " + result["counter"] + " " + result["verdict"]
+        )
+    else:
+        narration = result["summary"]
+    components_v1.html(components.speak_button_html(narration), height=40)
 
     if result["steelman"]:
         col1, col2 = st.columns(2)
