@@ -1,6 +1,6 @@
 import streamlit as st
 
-from app import ask, debate, history, moments, overview, replay, styles, tactical_dna, what_if
+from app import ask, debate, fatigue_pressure, history, moments, overview, replay, styles, tactical_dna, what_if
 from backend.engines import analytics, explainer
 
 st.set_page_config(page_title="MatchMind", layout="centered")
@@ -22,8 +22,8 @@ match_data["win_confidence"] = analytics.live_win_confidence(
     match_data["events"], match_data["momentum"], match_data["home"]["name"], match_data["away"]["name"],
 )
 
-tab_overview, tab_moments, tab_ask, tab_debate, tab_history, tab_replay, tab_tactical_dna, tab_what_if = st.tabs(
-    ["Overview", "Moments", "Ask MatchMind", "Debate", "History", "Live Replay", "Tactical DNA", "What If"]
+tab_overview, tab_moments, tab_ask, tab_debate, tab_history, tab_replay, tab_tactical_dna, tab_what_if, tab_fatigue_pressure = st.tabs(
+    ["Overview", "Moments", "Ask MatchMind", "Debate", "History", "Live Replay", "Tactical DNA", "What If", "Fatigue & Pressure"]
 )
 
 with tab_overview:
@@ -49,3 +49,6 @@ with tab_tactical_dna:
 
 with tab_what_if:
     what_if.render_what_if(match_data)
+
+with tab_fatigue_pressure:
+    fatigue_pressure.render_fatigue_pressure(match_data)
