@@ -17,6 +17,9 @@ match_data = {
         explainer.MATCH_DATA["events"], analytics.TELEMETRY_DATA["event_weights_for_momentum"]
     ),
 }
+match_data["win_confidence"] = analytics.live_win_confidence(
+    match_data["events"], match_data["momentum"], match_data["home"]["name"], match_data["away"]["name"],
+)
 
 tab_overview, tab_moments, tab_ask, tab_debate, tab_history, tab_replay = st.tabs(
     ["Overview", "Moments", "Ask MatchMind", "Debate", "History", "Live Replay"]

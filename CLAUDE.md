@@ -196,6 +196,18 @@ Compare vs human motor reaction ~250 ms. Demo: 53 ms — 4.7x deficit.
 Sweeps sigma_line from 1.5-4.0 cm; proves P(offside) is stable across
 plausible skeletal-tracking implementations.
 
+### 7. Live win confidence (Live Replay tab only)
+```
+goal_diff = |home_goals - away_goals| at this minute
+momentum_oriented = momentum value, sign-flipped toward whichever team leads
+raw = goal_diff * (1.5 + 2.5 * minute / 90) + 0.05 * momentum_oriented
+confidence = sigmoid(raw)
+```
+Tied score -> confidence = 0.5, no leader. Same goal lead is worth more
+confidence as the clock runs down. `analytics.live_win_confidence()` returns
+one point per `momentum_curve` minute; `app/replay.py`'s embedded JS looks
+up the nearest point each tick.
+
 ---
 
 ## LLM adapter — provider switching
@@ -376,7 +388,13 @@ not a nice-to-have.
 
 ## What NOT to do
 
-- Do not add score prediction features — explicitly out of scope.
+- Do not add final-score prediction (e.g. "predicted final score: 2-1") — that's a
+  different product (a betting/forecasting tool), not an explainability companion.
+  The one narrow exception is the Live Replay tab's win-confidence meter
+  (`analytics.live_win_confidence`) — it explains *why* the current leader looks
+  likely to hold on, using the same computed-analytics-with-explicit-formula
+  pattern as everything else, not a opaque predictive model. Don't generalize
+  from that one exception to "predictive features are fine now."
 - Do not let the system override or replace referee decisions — it explains them.
 - Do not display unverified numbers — every figure must exist in the evidence corpus.
 - Do not change `explainer.ask()`'s return schema without updating `app/ask.py` and
