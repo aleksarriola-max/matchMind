@@ -393,7 +393,7 @@ not a nice-to-have.
   The one narrow exception is the Live Replay tab's win-confidence meter
   (`analytics.live_win_confidence`) — it explains *why* the current leader looks
   likely to hold on, using the same computed-analytics-with-explicit-formula
-  pattern as everything else, not a opaque predictive model. Don't generalize
+  pattern as everything else, not an opaque predictive model. Don't generalize
   from that one exception to "predictive features are fine now."
 - Do not let the system override or replace referee decisions — it explains them.
 - Do not display unverified numbers — every figure must exist in the evidence corpus.
