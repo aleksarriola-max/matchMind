@@ -285,3 +285,17 @@ def render_incident_card_html(incident: dict) -> str:
         html += f'<div class="callout">{incident["comparison_to_today"]}</div>'
     html += "</div>"
     return html
+
+
+def render_referee_card_html(referee_name: str, profile: dict) -> str:
+    return (
+        '<div class="team-card">'
+        f"<h3>Match Officiating</h3>"
+        f"<div>{referee_name}</div>"
+        f'<div>{profile["var_reviews_triggered"]} VAR reviews this match — '
+        f'{profile["overturned_count"]} overturned, {profile["upheld_count"]} upheld</div>'
+        f'<div>{profile["penalties_awarded"]} penalties awarded '
+        f'({profile["penalty_appeals"]} appeal{"s" if profile["penalty_appeals"] != 1 else ""} reviewed)</div>'
+        f'<div>{profile["cautions_issued"]} cautions issued</div>'
+        "</div>"
+    )

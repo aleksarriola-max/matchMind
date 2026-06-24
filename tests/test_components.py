@@ -144,3 +144,38 @@ def test_render_incident_card_html_includes_title_year_and_decision():
     assert "1986" in html
     assert "Goal stood" in html
     assert "VAR would have caught this instantly." in html
+
+
+def test_render_referee_card_html_includes_name_and_counts():
+    profile = {
+        "var_reviews_triggered": 2,
+        "overturned_count": 1,
+        "upheld_count": 1,
+        "overturn_rate": 0.5,
+        "penalty_appeals": 1,
+        "penalties_awarded": 0,
+        "cautions_issued": 0,
+    }
+    html = components.render_referee_card_html("Hugo Martínez", profile)
+    assert "Hugo Martínez" in html
+    assert "this match" in html.lower()
+    assert "2" in html  # var reviews triggered
+    assert "1 overturned" in html
+    assert "1 upheld" in html
+    assert "0 penalties awarded" in html
+    assert "1 appeal" in html
+    assert "0 cautions" in html
+
+
+def test_render_referee_card_html_handles_no_var_reviews():
+    profile = {
+        "var_reviews_triggered": 0,
+        "overturned_count": 0,
+        "upheld_count": 0,
+        "overturn_rate": None,
+        "penalty_appeals": 0,
+        "penalties_awarded": 0,
+        "cautions_issued": 0,
+    }
+    html = components.render_referee_card_html("Hugo Martínez", profile)
+    assert "0 VAR reviews" in html
