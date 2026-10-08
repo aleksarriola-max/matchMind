@@ -53,9 +53,11 @@ question --> ROUTE (match-moment router)
 
 ```bash
 pip install -r requirements.txt
-uvicorn backend.main:app --reload
-# open http://localhost:8000
+streamlit run app/main.py
+# open http://localhost:8501
 ```
+
+Runs out of the box in demo mode, so no API keys are needed.
 
 Connect real Granite:
 
@@ -76,13 +78,12 @@ python -m backend.rag.ingest Laws_of_the_Game_2025_26.pdf
 
 Every number in the UI is **computed, with an error model, and evaluated**:
 
-- **Probabilistic offside model** — the 27' call is treated as statistical inference: Gaussian error propagation over kick-point (sigma ~3.1 cm) and limb-line placement (sigma=2.5 cm) gives P(truly offside) = 99.7%, z = 2.78, 95% CI [3.3, 18.7] cm. Decision probability and explanation confidence are deliberately separated (see docs/METHODOLOGY.md section 1).
-- **Computed fatigue index** — the "late collapse" is a four-indicator composite (sprint decline, line stretch, long-pass drift, pressing decay) over windowed telemetry, peaking at 65.2 in minutes 75-90. Every component is returned by the API so the weighting is contestable.
+- **Probabilistic offside model** — the 27' call is treated as statistical inference: Gaussian error propagation over kick-point (sigma ~3.1 cm) and limb-line placement (sigma=2.5 cm) gives P(truly offside) = 99.7%, z = 2.78, 95% CI [3.3, 18.7] cm. Decision probability and explanation confidence are deliberately separated (formulas in `backend/engines/analytics.py`; summary in `CLAUDE.md`).
+- **Computed fatigue index** — the "late collapse" is a four-indicator composite (sprint decline, line stretch, long-pass drift, pressing decay) over windowed telemetry, peaking at 65.2 in minutes 75-90. Every component is exposed by `analytics.py` so the weighting is contestable.
 - **Reconstructed momentum** — the timeline chart is an event-weighted, exponentially-decayed computation from the raw feed; change the weights in `telemetry.json` and the chart changes. Reproducible and falsifiable.
 - **Computed counterfactual & reaction models** — "16 ms later run = level" (margin / sprint speed) and "53 ms ball travel vs 250 ms human reaction = a 4.7x deficit" for the handball. The decision boundary is calculated, with parameters exposed.
-- **Evaluated, with published failures** — 75-run golden harness (`python -m evals.run_evals`): routing 100%, retrieval precision 100%, MRR 0.84, verification 100%, coverage 0.92, momentum sanity 3/3. The harness caught and documents four real bugs during development.
-- **Red-teamed verifier** — we attacked our own hallucination firewall (`python -m evals.verifier_redteam`): numeric corruption 4/4 caught, fabrication 4/4, entity-swap/negation honestly documented as lexical blind spots (the production Granite entailment check's acceptance test).
-- **Threats-to-validity section** — METHODOLOGY.md section 6 lists the five weakest points of this prototype before any judge has to find them.
+- **Evaluated, with published failures** — 75-run golden harness (`python -m evals.run_evals`): routing 100%, retrieval precision@1 100%, MRR 1.0, verification 100%, coverage 1.0, momentum sanity 3/3 (latest run in `evals/results.json`). The harness caught and documents four real bugs during development.
+- **Red-teamed verifier** — we attacked our own hallucination firewall (`python -m evals.verifier_redteam`). The lexical demo-mode verifier catches numeric corruption and fabrication but misses entity-swap and negation attacks, a documented blind spot. With Granite running via Ollama, the second entailment pass catches all four attack types (`evals/redteam_results.json`).
 
 ## Why it matters for soccer and the World Cup
 
@@ -91,31 +92,31 @@ Every number in the UI is **computed, with an error model, and evaluated**:
 ## Repo map
 
 ```
+app/                       Streamlit UI (entry point: app/main.py)
+  overview.py              match overview + momentum chart
+  moments.py               Decision Lab (offside/VAR pitch view) + key moments
+  ask.py                   Ask MatchMind chat
+  debate.py                Explain-my-outrage / Debate Mode
+  history.py               Decision Consistency Analyzer
+  replay.py                live second-screen replay
+  components.py            HTML/SVG builders (unit-tested)
 backend/
-  main.py               FastAPI app + API (ask, outrage, consistency, moments)
-  llm/adapter.py        Granite adapter (watsonx | ollama | demo)
-  rag/ingest.py         Docling document ingestion
-  rag/retriever.py      TF-IDF retrieval over knowledge chunks
-  engines/explainer.py  route -> ground -> reason -> explain pipeline
-  engines/verifier.py   verification agent (hallucination firewall)
-  engines/consistency.py decision consistency vs World Cup history
-  data/sample_match.json        demo World Cup fixture + moment dossiers
-  data/historical_incidents.json real officiating history (1986-2022)
-  data/knowledge/*.md           retrieval knowledge pack (Docling output)
-frontend/index.html     single-file UI: timeline, Decision Lab, live replay,
-                        Ask MatchMind, Explain-my-outrage, voice, a11y
+  llm/adapter.py           Granite adapter (watsonx | ollama | demo)
+  rag/ingest.py            Docling document ingestion
+  rag/retriever.py         TF-IDF retrieval over knowledge chunks
+  engines/explainer.py     route -> ground -> reason -> explain pipeline
+  engines/verifier.py      verification agent (hallucination firewall)
+  engines/consistency.py   decision consistency vs World Cup history
+  engines/analytics.py     computed models: offside probability, fatigue index, momentum
+  data/                    demo fixture, telemetry, historical incidents, knowledge pack
 integrations/telegram_bot.py  chat-app front-end (zero extra deps)
-  engines/analytics.py  computed models: offside probability, fatigue index, momentum
-  data/telemetry.json           windowed physical/positional telemetry (demo)
-evals/                  golden-set evaluation harness + results.json
-docs/                   architecture, methodology & evaluation, build plan,
-                        demo script, LangFlow guide
+evals/                     golden-set harness + red-team, with saved results
+tests/                     pytest suite
+docs/                      problem statement, demo script, design specs
 ```
 
 *Demo fixture uses a sample match (Argentina vs France) and demo telemetry; all rule content paraphrases the IFAB Laws of the Game.*
 
 ## Build status
 
-This repo is being built incrementally. See `docs/superpowers/specs/` for
-phase-by-phase design docs and `CLAUDE.md` for the current build status —
-not every feature described above exists yet.
+All components described above are implemented: the Streamlit app, computed analytics models, verifier, consistency analyzer, Granite providers (watsonx and Ollama), Docling ingestion, evals and the Telegram bot. The pytest suite (129 tests) passes. The app runs in demo mode by default; real Granite answers require watsonx credentials or a local Ollama server. Phase-by-phase design docs are in `docs/superpowers/specs/`.
