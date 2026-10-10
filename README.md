@@ -74,6 +74,18 @@ pip install docling
 python -m backend.rag.ingest Laws_of_the_Game_2025_26.pdf
 ```
 
+## When I'd distrust it
+
+MatchMind is designed to show its uncertainty, but some of that uncertainty is itself assumed:
+
+- **The match is a demo fixture.** The Argentina–France match, its telemetry and its moment dossiers are sample data, not tracking data from a real broadcast.
+- **The offside probability inherits its error model.** The 99.7% comes from assumed measurement errors (about 6 cm frame uncertainty, 2.5 cm limb-line). The sensitivity sweep shows it holds for plausible values, but the inputs aren't measured here.
+- **Demo mode's fact-check is lexical.** Without Granite running, the verifier misses entity swaps and negations (documented in `evals/redteam_results.json`). The Granite entailment pass catches both.
+- **Retrieval is TF-IDF over a small knowledge pack**, so questions phrased very differently from the Laws of the Game text may pull the wrong section.
+- **Explanation confidence uses hand-set priors** by decision type; they are not calibrated against real outcomes.
+
+**The safeguard I'd add:** run the verifier in Granite mode by default for anything user-facing, and calibrate the confidence priors on a labeled set of past VAR decisions.
+
 ## Analytical depth (the part that isn't a demo trick)
 
 Every number in the UI is **computed, with an error model, and evaluated**:
