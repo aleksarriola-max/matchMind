@@ -4,6 +4,11 @@
 
 Built for the IBM Soccer Challenge · Powered by IBM Granite, Docling, and retrieval-grounded explainability.
 
+<p align="center">
+  <img src="docs/decision-lab.gif" width="640" alt="Decision Lab: toggling the referee sightline and the ±7.7 cm uncertainty band on the 27th-minute offside call (11 cm margin, P(offside) = 99.7%)">
+  <br><sub>Decision Lab: the 27' offside call with the referee's sightline and the ±7.7 cm (95% CI) uncertainty band toggled on and off.</sub>
+</p>
+
 ---
 
 ## The problem
