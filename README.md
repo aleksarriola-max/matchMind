@@ -4,6 +4,12 @@
 
 Built for the IBM Soccer Challenge · Powered by IBM Granite, Docling, and retrieval-grounded explainability.
 
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Streamlit-FF4B4B?logo=streamlit&logoColor=white)](https://mainpy-hpdupmoyakddvxo348e4yn.streamlit.app/)
+[![Tests](https://img.shields.io/badge/tests-129%20passing-2ea44f)](tests/)
+[![Eval](https://img.shields.io/badge/eval%20harness-75%20questions-6E40C9)](evals/)
+[![IBM Granite](https://img.shields.io/badge/IBM-Granite-0F62FE?logo=ibm&logoColor=white)](backend/llm/adapter.py)
+[![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](requirements.txt)
+
 <p align="center">
   <img src="docs/decision-lab.gif" width="640" alt="Decision Lab: toggling the referee sightline and the ±7.7 cm uncertainty band on the 27th-minute offside call (11 cm margin, P(offside) = 99.7%)">
   <br><sub>Decision Lab: the 27' offside call with the referee's sightline and the ±7.7 cm (95% CI) uncertainty band toggled on and off.</sub>
